@@ -8,10 +8,41 @@ const doctorsList = [
 	{ id: 3, name: 'Dr. Carol Lee', specialty: 'Pediatrician' },
 ];
 
+
 function Patientdashboard() {
 	const [selectedDoctor, setSelectedDoctor] = useState('');
 	const [appointmentDate, setAppointmentDate] = useState('');
 	const [appointments, setAppointments] = useState([]);
+	// Dummy profile data
+
+	const [profile, setProfile] = useState({
+		name: 'John Doe',
+		dob: '1990-01-01',
+		gender: 'Male',
+		medicalHistory: 'Diabetes, Hypertension',
+		address: '123 Main St, Springfield',
+	});
+	const [editing, setEditing] = useState(false);
+	const [editProfile, setEditProfile] = useState(profile);
+
+	const handleProfileChange = (e) => {
+		setEditProfile({ ...editProfile, [e.target.name]: e.target.value });
+	};
+
+	const handleEdit = () => {
+		setEditProfile(profile);
+		setEditing(true);
+	};
+
+	const handleSave = () => {
+		setProfile(editProfile);
+		setEditing(false);
+	};
+
+	const handleCancel = () => {
+		setEditProfile(profile);
+		setEditing(false);
+	};
 
 	const handleBook = (e) => {
 		e.preventDefault();
@@ -33,6 +64,85 @@ function Patientdashboard() {
 	return (
 		<div className="p-6 max-w-3xl mx-auto">
 			<h2 className="text-2xl font-bold mb-6">Patient Dashboard</h2>
+
+
+						{/* Profile Section */}
+						<div className="mb-8 bg-base-100 p-6 rounded-lg shadow">
+							<h3 className="text-xl font-semibold mb-4">Profile</h3>
+							{editing ? (
+								<form className="grid grid-cols-1 gap-3 mb-2" onSubmit={e => { e.preventDefault(); handleSave(); }}>
+									<label>
+										<span className="font-medium">Name:</span>
+										<input
+											type="text"
+											name="name"
+											className="input input-bordered w-full mt-1"
+											value={editProfile.name}
+											onChange={handleProfileChange}
+											required
+										/>
+									</label>
+									<label>
+										<span className="font-medium">Date of Birth:</span>
+										<input
+											type="date"
+											name="dob"
+											className="input input-bordered w-full mt-1"
+											value={editProfile.dob}
+											onChange={handleProfileChange}
+											required
+										/>
+									</label>
+									<label>
+										<span className="font-medium">Gender:</span>
+										<select
+											name="gender"
+											className="select select-bordered w-full mt-1"
+											value={editProfile.gender}
+											onChange={handleProfileChange}
+											required
+										>
+											<option value="Male">Male</option>
+											<option value="Female">Female</option>
+											<option value="Other">Other</option>
+										</select>
+									</label>
+									<label>
+										<span className="font-medium">Medical History:</span>
+										<input
+											type="text"
+											name="medicalHistory"
+											className="input input-bordered w-full mt-1"
+											value={editProfile.medicalHistory}
+											onChange={handleProfileChange}
+										/>
+									</label>
+									<label>
+										<span className="font-medium">Address:</span>
+										<input
+											type="text"
+											name="address"
+											className="input input-bordered w-full mt-1"
+											value={editProfile.address}
+											onChange={handleProfileChange}
+										/>
+									</label>
+									<div className="flex gap-2 mt-2">
+										<button type="submit" className="btn btn-primary">Save</button>
+										<button type="button" className="btn btn-outline" onClick={handleCancel}>Cancel</button>
+									</div>
+								</form>
+							) : (
+								<div className="grid grid-cols-1 gap-2">
+									<div><span className="font-medium">Name:</span> {profile.name}</div>
+									<div><span className="font-medium">Date of Birth:</span> {profile.dob}</div>
+									<div><span className="font-medium">Gender:</span> {profile.gender}</div>
+									<div><span className="font-medium">Medical History:</span> {profile.medicalHistory}</div>
+									<div><span className="font-medium">Address:</span> {profile.address}</div>
+									<button className="btn btn-secondary mt-2 w-fit" onClick={handleEdit}>Edit</button>
+								</div>
+							)}
+						</div>
 
 			{/* Book Appointment */}
 			<div className="mb-8 bg-base-100 p-6 rounded-lg shadow">
