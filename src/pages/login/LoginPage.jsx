@@ -32,6 +32,10 @@ function LoginPage() {
         >
           Switch to {role === 'doctor' ? 'Patient' : 'Doctor'} Login
         </button>
+        <div className="text-center mt-4">
+          <span>New? </span>
+          <a href="/register" className="link link-primary">Sign up</a>
+        </div>
       </div>
     </div>
   );

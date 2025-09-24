@@ -60,6 +60,10 @@ function RegisterPage() {
 				>
 					Switch to {role === 'doctor' ? 'Patient' : 'Doctor'} Registration
 				</button>
+				<div className="text-center mt-4">
+					<span>Already have an account? </span>
+					<a href="/login" className="link link-primary">Login</a>
+				</div>
 			</div>
 		</div>
 	);
