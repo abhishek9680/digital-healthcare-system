@@ -10,7 +10,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "daisyui": "^5.1.14",
+    "@tailwindcss/vite": "^4.1.13",
+    "daisyui": "^5.1.18",
     "mongoose": "^8.18.2",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
