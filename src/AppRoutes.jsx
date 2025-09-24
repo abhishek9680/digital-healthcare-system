@@ -1,6 +1,7 @@
 import LandingPage from "./pages/landing/LandingPage";
 import LoginPage from "./pages/login/LoginPage";
 import Navbar from "./components/Navbar";
+import RegisterPage from "./pages/register/RegisterPage";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 export default function AppRouter() {
@@ -11,6 +12,8 @@ export default function AppRouter() {
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+
         </Routes>
       </BrowserRouter>
     </>
