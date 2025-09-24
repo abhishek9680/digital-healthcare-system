@@ -4,7 +4,7 @@ import React, { useState } from "react";
 const mockAppointments = [
 	{
 		id: 1,
-		patient: "John Doe",
+		patient: "Rohan Sharma",
 		date: "2025-09-27",
 		time: "10:00 AM",
 		status: "pending",
@@ -12,7 +12,7 @@ const mockAppointments = [
 	},
 	{
 		id: 2,
-		patient: "Jane Smith",
+		patient: "Rahul Verma",
 		date: "2025-09-28",
 		time: "2:30 PM",
 		status: "pending",
@@ -20,7 +20,7 @@ const mockAppointments = [
 	},
 	{
 		id: 3,
-		patient: "Bob Brown",
+		patient: "Sneha Kapoor",
 		date: "2025-09-29",
 		time: "11:15 AM",
 		status: "accepted",
@@ -34,9 +34,9 @@ const Doctordashboard = () => {
 	// Dummy profile data
 
 	const [profile, setProfile] = useState({
-		name: 'Dr. Alice Smith',
+		name: 'Dr. Vijay Kumar',
 		specialty: 'Cardiologist',
-		worksAt: 'Springfield General Hospital',
+		worksAt: 'Govt.Central Hospital',
 		experience: '10 years',
 	});
 	const [editing, setEditing] = useState(false);

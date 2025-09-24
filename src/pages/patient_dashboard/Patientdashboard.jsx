@@ -3,9 +3,9 @@ import React, { useState } from 'react';
 
 // Dummy data for doctors and appointments
 const doctorsList = [
-	{ id: 1, name: 'Dr. Alice Smith', specialty: 'Cardiologist' },
-	{ id: 2, name: 'Dr. Bob Johnson', specialty: 'Dermatologist' },
-	{ id: 3, name: 'Dr. Carol Lee', specialty: 'Pediatrician' },
+	{ id: 1, name: 'Dr. Abhishek Mehra', specialty: 'Cardiologist' },
+	{ id: 2, name: 'Dr. Shubham Mishra', specialty: 'Dermatologist' },
+	{ id: 3, name: 'Dr. Anurag Bhargav', specialty: 'Pediatrician' },
 ];
 
 
@@ -16,11 +16,11 @@ function Patientdashboard() {
 	// Dummy profile data
 
 	const [profile, setProfile] = useState({
-		name: 'John Doe',
+		name: 'Santosh Kumar',
 		dob: '1990-01-01',
 		gender: 'Male',
 		medicalHistory: 'Diabetes, Hypertension',
-		address: '123 Main St, Springfield',
+		address: '12-Sardarpura, Jodhpur',
 	});
 	const [editing, setEditing] = useState(false);
 	const [editProfile, setEditProfile] = useState(profile);

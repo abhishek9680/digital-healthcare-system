@@ -47,7 +47,7 @@ function Navbar() {
                 </div>
                 <Link to="/" className="flex items-center gap-2 btn btn-ghost text-xl">
                     <img src="/logo.jpg" alt="Logo" className="h-8 w-8" />
-                    DHMS
+                    
                 </Link>
             </div>
             <div className="navbar-center hidden lg:flex">
