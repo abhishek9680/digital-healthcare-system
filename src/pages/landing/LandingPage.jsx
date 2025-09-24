@@ -16,7 +16,7 @@ function LandingPage() {
             <p className="py-4 text-lg text-base-content">
               Seamlessly schedule, view, and manage your healthcare appointments. Empowering patients and doctors with a secure, easy-to-use platform.
             </p>
-            <a href="/register" className="btn btn-primary btn-lg mt-4">Get Started</a>
+            <a href="/register" className="btn btn-primary btn-lg mt-4">Book an Appointment</a>
           </div>
         </div>
       </section>
