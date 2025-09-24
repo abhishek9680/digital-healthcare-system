@@ -7,7 +7,7 @@ function LandingPage() {
       <section className="hero py-12 bg-base-200">
         <div className="hero-content flex-col lg:flex-row-reverse gap-10">
           <img
-            src="https://picsum.photos/400/300"
+            src="/doctor.jpg"
             className="max-w-sm rounded-lg shadow-2xl"
             alt="Healthcare Illustration"
           />

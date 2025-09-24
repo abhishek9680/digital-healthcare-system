@@ -4,7 +4,7 @@ import Navbar from "./components/Navbar";
 import RegisterPage from "./pages/register/RegisterPage";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Patientdashboard from "./pages/patient_dashboard/Patientdashboard";
-// import Doctordashboard from "./pages/doctor_dashboard/Doctordashboard";
+import Doctordashboard from "./pages/doctor_dashboard/Doctordashboard";
 
 export default function AppRouter() {
   return (
@@ -16,7 +16,7 @@ export default function AppRouter() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/patient-dashboard" element={<Patientdashboard />} />
-          {/* <Route path="/doctor-dashboard" element={<Doctordashboard />} /> */}
+          <Route path="/doctor-dashboard" element={<Doctordashboard />} />
 
 
 
