@@ -1,22 +1,42 @@
-
 import React, { useState } from 'react';
+import { registerPatient, registerDoctor } from '../../api';
+import { useNavigate } from 'react-router-dom';
 
-function RegisterPage() {
+const RegisterPage = () => {
 	const [role, setRole] = useState('doctor');
 	const [form, setForm] = useState({ name: '', email: '', password: '' });
+	const [loading, setLoading] = useState(false);
+	const [error, setError] = useState('');
+	const [success, setSuccess] = useState('');
+	const navigate = useNavigate();
 
 	const toggleRole = () => {
 		setRole((prev) => (prev === 'doctor' ? 'patient' : 'doctor'));
+		setError('');
+		setSuccess('');
 	};
 
 	const handleChange = (e) => {
 		setForm({ ...form, [e.target.name]: e.target.value });
 	};
 
-	const handleSubmit = (e) => {
+	const handleSubmit = async (e) => {
 		e.preventDefault();
-		// Handle registration logic here
-		alert(`Registered as ${role}: ${form.name}, ${form.email}`);
+		setLoading(true);
+		setError('');
+		setSuccess('');
+		try {
+			if (role === 'doctor') {
+				await registerDoctor(form);
+			} else {
+				await registerPatient(form);
+			}
+			setSuccess('Registration successful! Please login.');
+			setTimeout(() => navigate('/login'), 1500);
+		} catch (err) {
+			setError(err.message || 'Registration failed');
+		}
+		setLoading(false);
 	};
 
 	return (
@@ -51,7 +71,11 @@ function RegisterPage() {
 						onChange={handleChange}
 						required
 					/>
-					<button type="submit" className="btn btn-primary w-full">Register</button>
+					<button type="submit" className="btn btn-primary w-full" disabled={loading}>
+						{loading ? 'Registering...' : 'Register'}
+					</button>
+					{error && <div className="text-red-500 text-center text-sm">{error}</div>}
+					{success && <div className="text-green-500 text-center text-sm">{success}</div>}
 				</form>
 				<button
 					className="btn btn-outline btn-secondary mt-4 w-full"

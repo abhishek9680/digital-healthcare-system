@@ -7,7 +7,7 @@ const Appointment = require('../models/Appointment');
 // Register new doctor
 exports.register = async (req, res) => {
   try {
-    const { name, email, password,speciality } = req.body;
+    const { name, email, password } = req.body;
 
     const existingDoctor = await Doctor.findOne({ email });
     if (existingDoctor) {
@@ -20,7 +20,7 @@ exports.register = async (req, res) => {
       name,
       email,
       password: hashedPassword,
-      speciality: speciality || null
+      speciality: "default" // default speciality if not provided
     });
 
     await doctor.save();

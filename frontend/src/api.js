@@ -1,0 +1,81 @@
+import axios from 'axios';
+
+const BASE_URL = 'http://localhost:5000/api';
+
+// Login API
+export const loginPatient = async (email, password) => {
+  try {
+    const res = await axios.post(`${BASE_URL}/patients/login`, { email, password });
+    return res.data; // { token, patient }
+  } catch (err) {
+    throw err.response?.data || { message: 'Login failed' };
+  }
+};
+
+export const loginDoctor = async (email, password) => {
+  try {
+    const res = await axios.post(`${BASE_URL}/doctors/login`, { email, password });
+    return res.data; // { token, doctor }
+  } catch (err) {
+    throw err.response?.data || { message: 'Login failed' };
+  }
+};
+
+// Register API
+export const registerPatient = async (patientData) => {
+  try {
+    const res = await axios.post(`${BASE_URL}/patients/register`, patientData);
+    return res.data;
+  } catch (err) {
+    throw err.response?.data || { message: 'Registration failed' };
+  }
+};
+
+export const registerDoctor = async (doctorData) => {
+  try {
+    const res = await axios.post(`${BASE_URL}/doctors/register`, doctorData);
+    return res.data;
+  } catch (err) {
+    throw err.response?.data || { message: 'Registration failed' };
+  }
+};
+
+// Get patient profile
+export const getPatientProfile = async (token) => {
+  const user = JSON.parse(localStorage.getItem('user'));
+  const patientEmail = user?.email;
+  const res= await axios.get(`${BASE_URL}/patients/profile`, {
+    headers: { Authorization: `Bearer ${token}` },
+    params: { patientEmail },
+  });
+  const patient = res.data.patient;
+  return patient;
+};
+
+// Get doctor profile
+export const getDoctorProfile = async (token) => {
+  return axios.get(`${BASE_URL}/doctor/profile`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+};
+
+// Get patient appointments
+export const getPatientAppointments = async (token) => {
+  const user = JSON.parse(localStorage.getItem('user'));
+  const patientEmail = user?.email;
+  const res= await axios.get(`${BASE_URL}/patients/appointments`, {
+    headers: { Authorization: `Bearer ${token}` },
+    params: { patientEmail },
+  });
+  const appointments = res.data.appointments;
+
+  return appointments;
+};
+
+// ...add other APIs as needed
+
+// Logout utility
+export const logout = () => {
+  localStorage.removeItem('token');
+  localStorage.removeItem('user');
+};

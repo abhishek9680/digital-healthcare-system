@@ -1,10 +1,20 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { logout } from '../api';
 
 
 function Navbar() {
-    // TODO: Replace with real auth logic and user role
-    const isLoggedIn = false; // Set to true if user is logged in
-    const userRole = null; // 'doctor' | 'patient' | null
+    // Get auth state from localStorage
+    const navigate = useNavigate();
+    const token = localStorage.getItem('token');
+    const user = JSON.parse(localStorage.getItem('user') || 'null');
+    const isLoggedIn = !!token;
+    // Determine user role based on user object
+    const userRole = user?.specialty ? 'doctor' : (user ? 'patient' : null);
+
+    const handleLogout = () => {
+        logout();
+        navigate('/login');
+    };
 
     // Navigation links for all users
     const commonLinks = [
@@ -12,8 +22,8 @@ function Navbar() {
     ];
     // Dashboard links based on role
     const dashboardLinks = [
-        userRole === 'doctor' && { to: '/doctor_dashboard', label: 'Doctor Dashboard' },
-        userRole === 'patient' && { to: '/patient_dashboard', label: 'Patient Dashboard' },
+        userRole === 'doctor' && { to: '/doctor-dashboard', label: 'Doctor Dashboard' },
+        userRole === 'patient' && { to: '/patient-dashboard', label: 'Patient Dashboard' },
     ].filter(Boolean);
     // Auth links
     const authLinks = [
@@ -41,7 +51,7 @@ function Navbar() {
                             <li key={link.to}><Link to={link.to}>{link.label}</Link></li>
                         ))}
                         {isLoggedIn && (
-                            <li><button className="btn btn-error btn-sm mt-2">Logout</button></li>
+                            <li><button className="btn btn-error btn-sm mt-2" onClick={handleLogout}>Logout</button></li>
                         )}
                     </ul>
                 </div>
@@ -68,10 +78,10 @@ function Navbar() {
                     <div className="flex items-center gap-2">
                         <div className="avatar placeholder">
                             <div className="bg-neutral text-neutral-content rounded-full w-8">
-                                <span>U</span>
+                                <span>{user?.name ? user.name[0].toUpperCase() : 'U'}</span>
                             </div>
                         </div>
-                        <button className="btn btn-error btn-sm">Logout</button>
+                        <button className="btn btn-error btn-sm" onClick={handleLogout}>Logout</button>
                     </div>
                 ) : (
                     <Link to="/login" className="btn btn-primary btn-sm">Login</Link>
@@ -81,4 +91,4 @@ function Navbar() {
     );
 }
 
-export default Navbar
+export default Navbar;
