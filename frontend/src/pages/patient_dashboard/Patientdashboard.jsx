@@ -1,13 +1,8 @@
 
 import  { useState, useEffect } from 'react';
-import { getPatientProfile, getPatientAppointments } from '../../api';
+import { getPatientProfile, getPatientAppointments, updatePatientProfile,getAllDoctors } from '../../api';
 
-// Dummy doctors list (replace with API if available)
-const doctorsList = [
-	{ id: 1, name: 'Dr. Abhishek Mehra', specialty: 'Cardiologist' },
-	{ id: 2, name: 'Dr. Shubham Mishra', specialty: 'Dermatologist' },
-	{ id: 3, name: 'Dr. Anurag Bhargav', specialty: 'Pediatrician' },
-];
+
 
 
 function Patientdashboard() {
@@ -19,6 +14,7 @@ function Patientdashboard() {
 	const [editProfile, setEditProfile] = useState(null);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState('');
+	const [doctorsList, setDoctorsList] = useState([]);
 
 	// Fetch patient profile and appointments on mount
 	useEffect(() => {
@@ -40,6 +36,8 @@ function Patientdashboard() {
 				const apptRes = await getPatientAppointments(token);
 				console.log("Appointments fetched:", apptRes);
 				setAppointments(apptRes);
+				const doctors = await getAllDoctors();
+				setDoctorsList(doctors);
 			} catch (err) {
 				setError('Failed to fetch data.');
 			}
@@ -57,10 +55,20 @@ function Patientdashboard() {
 			setEditing(true);
 		};
 
-		// TODO: Implement profile update API call
-		const handleSave = () => {
-			setProfile(editProfile);
-			setEditing(false);
+		// Implement profile update API call
+		const handleSave = async () => {
+			setLoading(true);
+			setError('');
+			try {
+				const token = localStorage.getItem('token');
+				const updated = await updatePatientProfile(token, { ...editProfile, email: profile.email });
+				setProfile(updated);
+				setEditProfile(updated);
+				setEditing(false);
+			} catch (err) {
+				setError('Failed to update profile.');
+			}
+			setLoading(false);
 		};
 
 	const handleCancel = () => {
@@ -71,13 +79,13 @@ function Patientdashboard() {
 	const handleBook = (e) => {
 		e.preventDefault();
 		if (!selectedDoctor || !appointmentDate) return;
-		const doctor = doctorsList.find((d) => d.id === parseInt(selectedDoctor));
+		const doctor = doctorsList.find((d) => d._id === selectedDoctor);
 		setAppointments([
 			...appointments,
 			{
 				id: Date.now(),
-				doctor: doctor.name,
-				specialty: doctor.specialty,
+				doctorEmail: doctor.email,
+				specialty: doctor.speciality,
 				date: appointmentDate,
 			},
 		]);
@@ -116,7 +124,7 @@ function Patientdashboard() {
 											type="date"
 											name="dob"
 											className="input input-bordered w-full mt-1"
-											value={editProfile?.dob || ''}
+											value={editProfile?.dob ? new Date(editProfile.dob).toISOString().slice(0, 10) : ''}
 											onChange={handleProfileChange}
 											required
 										/>
@@ -184,8 +192,8 @@ function Patientdashboard() {
 								>
 									<option value="" disabled>Select Doctor</option>
 									{doctorsList.map((doc) => (
-										<option key={doc.id} value={doc.id}>
-											{doc.name} ({doc.specialty})
+										<option key={doc._id} value={doc._id}>
+											{doc.name} ({doc.speciality})
 										</option>
 									))}
 								</select>
@@ -205,9 +213,10 @@ function Patientdashboard() {
 							<h3 className="text-xl font-semibold mb-4">Available Doctors</h3>
 							<ul className="divide-y">
 								{doctorsList.map((doc) => (
-									<li key={doc.id} className="py-2 flex flex-col">
+									<li key={doc._id} className="py-2 flex flex-col">
 										<span className="font-medium">{doc.name}</span>
-										<span className="text-sm text-gray-500">{doc.specialty}</span>
+										<span className="text-sm text-gray-500">Email :{doc.email}</span>
+										<span className="text-sm text-gray-500">Speciality :{doc.speciality}</span>
 									</li>
 								))}
 							</ul>

@@ -187,3 +187,19 @@ exports.updateAppointmentStatus = async (req, res) => {
     res.status(500).json({ message: 'Server error while updating appointment status' });
   }
 };
+
+
+// Get all doctors (unprotected)
+exports.getAllDoctors = async (req, res) => {
+  try {
+    const doctors = await Doctor.find().select('-password');
+    res.status(200).json({
+      message: 'Doctors fetched successfully',
+      total: doctors.length,
+      doctors,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error while fetching doctors' });
+  }
+};

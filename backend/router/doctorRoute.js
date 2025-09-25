@@ -8,6 +8,9 @@ const authMiddleware = require('../middleware/authMiddleware'); // Assuming you 
 router.post('/api/doctors/register', doctorController.register);
 router.post('/api/doctors/login', doctorController.login);
 
+// Get all doctors (unprotected)
+router.get('/api/doctors/all', doctorController.getAllDoctors);
+
 // Protected routes (require authentication)
 router.put('/api/doctors/update', authMiddleware, doctorController.updateDoctor);
 

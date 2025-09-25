@@ -53,6 +53,10 @@ export const getPatientProfile = async (token) => {
 };
 
 // Get doctor profile
+export const getAllDoctors = async () => {
+  const res = await axios.get(`${BASE_URL}/doctors/all`);
+  return res.data.doctors;
+};
 export const getDoctorProfile = async (token) => {
   return axios.get(`${BASE_URL}/doctor/profile`, {
     headers: { Authorization: `Bearer ${token}` },
@@ -72,6 +76,14 @@ export const getPatientAppointments = async (token) => {
   return appointments;
 };
 
+// ...add other APIs as needed
+// Update patient profile
+export const updatePatientProfile = async (token, profileData) => {
+  const res = await axios.put(`${BASE_URL}/patients/update`, profileData, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return res.data.patient;
+};
 // ...add other APIs as needed
 
 // Logout utility
