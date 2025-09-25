@@ -173,7 +173,7 @@ exports.bookAppointment = async (req, res) => {
       doctorEmail,
       patientEmail,
       appointmentDate,
-      status: "booked",
+      status: "pending",
     });
 
     await appointment.save();

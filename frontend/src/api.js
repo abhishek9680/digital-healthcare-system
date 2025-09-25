@@ -76,7 +76,18 @@ export const getPatientAppointments = async (token) => {
   return appointments;
 };
 
-// ...add other APIs as needed
+// Book appointment
+export const bookAppointment = async (token, doctorEmail, appointmentDate, patientEmail) => {
+  const res = await axios.post(`${BASE_URL}/appointments/book`, {
+    doctorEmail,
+    appointmentDate,
+    patientEmail,
+  }, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return res.data.appointment;
+};
+
 // Update patient profile
 export const updatePatientProfile = async (token, profileData) => {
   const res = await axios.put(`${BASE_URL}/patients/update`, profileData, {
@@ -84,7 +95,6 @@ export const updatePatientProfile = async (token, profileData) => {
   });
   return res.data.patient;
 };
-// ...add other APIs as needed
 
 // Logout utility
 export const logout = () => {

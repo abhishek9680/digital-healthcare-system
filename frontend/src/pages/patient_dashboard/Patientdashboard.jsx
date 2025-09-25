@@ -1,6 +1,6 @@
 
 import  { useState, useEffect } from 'react';
-import { getPatientProfile, getPatientAppointments, updatePatientProfile,getAllDoctors } from '../../api';
+import { getPatientProfile, getPatientAppointments, updatePatientProfile, getAllDoctors, bookAppointment } from '../../api';
 
 
 
@@ -76,21 +76,23 @@ function Patientdashboard() {
 		setEditing(false);
 	};
 
-	const handleBook = (e) => {
+	const handleBook = async (e) => {
 		e.preventDefault();
 		if (!selectedDoctor || !appointmentDate) return;
-		const doctor = doctorsList.find((d) => d._id === selectedDoctor);
-		setAppointments([
-			...appointments,
-			{
-				id: Date.now(),
-				doctorEmail: doctor.email,
-				specialty: doctor.speciality,
-				date: appointmentDate,
-			},
-		]);
-		setSelectedDoctor('');
-		setAppointmentDate('');
+		setLoading(true);
+		setError('');
+		try {
+			const token = localStorage.getItem('token');
+			const doctor = doctorsList.find((d) => d._id === selectedDoctor);
+			const patientEmail = profile.email;
+			const newAppointment = await bookAppointment(token, doctor.email, appointmentDate, patientEmail);
+			setAppointments([newAppointment, ...appointments]);
+			setSelectedDoctor('');
+			setAppointmentDate('');
+		} catch (err) {
+			setError('Failed to book appointment.');
+		}
+		setLoading(false);
 	};
 
 		return (
