@@ -1,33 +1,147 @@
+// Update patient profile (excluding email and password)
+exports.updatePatient = async (req, res) => {
+  try {
+    const patientId = req.patientId; // from auth middleware
+    const updates = { ...req.body };
+
+    // Disallow updating email and password
+    delete updates.email;
+    delete updates.password;
+
+    const updatedPatient = await Patient.findByIdAndUpdate(
+      patientId,
+      { $set: updates },
+      { new: true, runValidators: true }
+    ).select('-password'); // Exclude password from response
+
+    if (!updatedPatient) {
+      return res.status(404).json({ message: 'Patient not found' });
+    }
+
+    res.status(200).json({
+      message: 'Profile updated successfully',
+      patient: updatedPatient,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+// Register new patient
+exports.register = async (req, res) => {
+  try {
+    const { name, email, password, dob, gender, medicalHistory, address } = req.body;
+
+    if (!name || !email || !password) {
+      return res.status(400).json({ message: 'Name, email, and password are required.' });
+    }
+
+    const existingPatient = await Patient.findOne({ email });
+    if (existingPatient) {
+      return res.status(400).json({ message: 'Patient with this email already exists' });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const patient = new Patient({
+      name,
+      email,
+      password: hashedPassword,
+      dob: dob || null,
+      gender: gender || null,
+      medicalHistory: medicalHistory || '',
+      address: address || '',
+    });
+
+    await patient.save();
+
+    const token = jwt.sign({ patientId: patient._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+
+    res.status(201).json({
+      message: 'Patient registered successfully',
+      token,
+      patient: {
+        id: patient._id,
+        name: patient.name,
+        email: patient.email,
+        dob: patient.dob,
+        gender: patient.gender,
+        medicalHistory: patient.medicalHistory,
+        address: patient.address,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// Login patient
+exports.login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    const patient = await Patient.findOne({ email });
+    if (!patient) {
+      return res.status(400).json({ message: 'Invalid credentials' });
+    }
+
+    const isMatch = await bcrypt.compare(password, patient.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: 'Invalid credentials' });
+    }
+
+    const token = jwt.sign({ patientId: patient._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+
+    res.status(200).json({
+      message: 'Login successful',
+      token,
+      patient: {
+        id: patient._id,
+        name: patient.name,
+        email: patient.email,
+        dob: patient.dob,
+        gender: patient.gender,
+        medicalHistory: patient.medicalHistory,
+        address: patient.address,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
 const Appointment = require('../models/Appointment');
 const Doctor = require('../models/Doctor');
 const Patient = require('../models/Patient');
 
-// Book an appointment (by patient)
+// Book an appointment (by patient, using emails)
 exports.bookAppointment = async (req, res) => {
   try {
-    const { doctorId, appointmentDate } = req.body;
-    const patientId = req.query.patientId;
+    const { doctorEmail, appointmentDate, patientEmail } = req.body;
 
     // Validate input
-    if (!doctorId || !appointmentDate) {
-      return res.status(400).json({ message: 'Doctor ID and appointment date are required' });
+    if (!doctorEmail || !appointmentDate || !patientEmail) {
+      return res.status(400).json({ message: 'Doctor email, patient email, and appointment date are required' });
     }
 
     // Check if doctor exists
-    const doctorExists = await Doctor.findById(doctorId);
+    const doctorExists = await Doctor.findOne({ email: doctorEmail });
     if (!doctorExists) {
       return res.status(404).json({ message: 'Doctor not found' });
     }
 
-    // Optional: Check if patient exists
-    const patientExists = await Patient.findById(patientId);
+    // Check if patient exists
+    const patientExists = await Patient.findOne({ email: patientEmail });
     if (!patientExists) {
       return res.status(404).json({ message: 'Patient not found' });
     }
 
-    // Optional: Check for overlapping appointments (same doctor & time)
+    // Check for overlapping appointments (same doctor & time)
     const isAlreadyBooked = await Appointment.findOne({
-      doctorId,
+      doctorEmail,
       appointmentDate: new Date(appointmentDate),
     });
     if (isAlreadyBooked) {
@@ -36,8 +150,8 @@ exports.bookAppointment = async (req, res) => {
 
     // Create appointment
     const appointment = new Appointment({
-      doctorId,
-      patientId,
+      doctorEmail,
+      patientEmail,
       appointmentDate,
       status: 'booked',
     });

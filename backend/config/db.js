@@ -1,14 +1,18 @@
 const mongoose = require('mongoose');
+require('dotenv').config();
 
 const connectDB = async () => {
+  const uri = process.env.MONGO_URI;
+  if (!uri) {
+    console.error('❌ MONGO_URI not set in environment variables.');
+    process.exit(1);
+  }
   try {
-    await mongoose.connect('mongodb://localhost:27017/digital_healthcare', {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
-    console.log('MongoDB connected');
+    console.log('Connecting to MongoDB...');
+    await mongoose.connect(uri);
+    console.log('✅ MongoDB connected');
   } catch (err) {
-    console.error('MongoDB connection error:', err);
+    console.error('❌ MongoDB connection error:', err.message);
     process.exit(1);
   }
 };

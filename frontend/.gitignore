@@ -25,3 +25,6 @@ llms.txt
 *.njsproj
 *.sln
 *.sw?
+
+node_modules
+.env

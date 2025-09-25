@@ -7,7 +7,7 @@ const Appointment = require('../models/Appointment');
 // Register new doctor
 exports.register = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password,speciality } = req.body;
 
     const existingDoctor = await Doctor.findOne({ email });
     if (existingDoctor) {
@@ -20,6 +20,7 @@ exports.register = async (req, res) => {
       name,
       email,
       password: hashedPassword,
+      speciality: speciality || null
     });
 
     await doctor.save();
@@ -33,6 +34,7 @@ exports.register = async (req, res) => {
         id: doctor._id,
         name: doctor.name,
         email: doctor.email,
+        speciality: doctor.speciality || null
       },
     });
   } catch (error) {
@@ -75,18 +77,21 @@ exports.login = async (req, res) => {
   }
 };
 
-// Update doctor profile (excluding email and password)
+
+// Update doctor profile (find by email in body, exclude email/password from update)
 exports.updateDoctor = async (req, res) => {
   try {
-    const doctorId = req.query.doctorId;
-    const updates = { ...req.body };
+    const { email, ...updates } = req.body;
+    if (!email) {
+      return res.status(400).json({ message: 'Email is required to update doctor profile.' });
+    }
 
     // Disallow updating email and password
     delete updates.email;
     delete updates.password;
 
-    const updatedDoctor = await Doctor.findByIdAndUpdate(
-      doctorId,
+    const updatedDoctor = await Doctor.findOneAndUpdate(
+      { email },
       { $set: updates },
       { new: true, runValidators: true }
     ).select('-password'); // Exclude password from response
@@ -99,7 +104,6 @@ exports.updateDoctor = async (req, res) => {
       message: 'Profile updated successfully',
       doctor: updatedDoctor,
     });
-
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error' });
@@ -107,15 +111,16 @@ exports.updateDoctor = async (req, res) => {
 };
 
 
-// Get all patients who booked with current doctor
+
+// Get all appointments for current doctor (by email)
 exports.getAppointmentsForDoctor = async (req, res) => {
   try {
-    const doctorId = req.query.doctorId;
-
-    const appointments = await Appointment.find({ doctorId })
-      .populate('patientId', 'name email dob gender medicalHistory address') // get patient details
-      .sort({ appointmentDate: -1 }); // optional: latest first
-
+    const doctorEmail = req.query.doctorEmail;
+    if (!doctorEmail) {
+      return res.status(400).json({ message: 'doctorEmail query parameter is required.' });
+    }
+    const appointments = await Appointment.find({ doctorEmail })
+      .sort({ appointmentDate: -1 });
     res.status(200).json({
       message: 'Appointments fetched successfully',
       total: appointments.length,
@@ -128,14 +133,12 @@ exports.getAppointmentsForDoctor = async (req, res) => {
 };
 
 
+
 // Get all appointments with status 'booked'
 exports.getBookedAppointments = async (req, res) => {
   try {
     const appointments = await Appointment.find({ status: 'booked' })
-      .populate('doctorId', 'name email specialty')
-      .populate('patientId', 'name email age gender')
-      .sort({ appointmentDate: -1 }); // Optional: sort latest first
-
+      .sort({ appointmentDate: -1 });
     res.status(200).json({
       message: 'Booked appointments fetched successfully',
       total: appointments.length,
@@ -147,27 +150,27 @@ exports.getBookedAppointments = async (req, res) => {
   }
 };
 
-// accecpt and reject appointment
+
+// Accept and reject appointment (by doctor email)
 exports.updateAppointmentStatus = async (req, res) => {
   try {
-    const doctorId = req.doctorId; // from authMiddleware
+    const doctorEmail = req.body.doctorEmail; // should be provided in body
     const { appointmentId } = req.params;
     const { status } = req.body;
 
     // Validate status input
     if (!['booked', 'rejected'].includes(status)) {
-      return res.status(400).json({ message: 'Invalid status. Must be "accepted" or "rejected".' });
+      return res.status(400).json({ message: 'Invalid status. Must be "booked" or "rejected".' });
     }
 
     // Find appointment by id
     const appointment = await Appointment.findById(appointmentId);
-
     if (!appointment) {
       return res.status(404).json({ message: 'Appointment not found' });
     }
 
-    // Check if logged-in doctor owns the appointment
-    if (appointment.doctorId.toString() !== doctorId) {
+    // Check if logged-in doctor owns the appointment (by email)
+    if (appointment.doctorEmail !== doctorEmail) {
       return res.status(403).json({ message: 'You are not authorized to update this appointment' });
     }
 
@@ -177,7 +180,7 @@ exports.updateAppointmentStatus = async (req, res) => {
 
     res.status(200).json({
       message: `Appointment ${status} successfully`,
-      appointment,
+      appointment
     });
   } catch (error) {
     console.error(error);
