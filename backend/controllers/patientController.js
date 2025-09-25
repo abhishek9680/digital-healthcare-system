@@ -1,15 +1,17 @@
-// Update patient profile (excluding email and password)
+// Update patient profile (find by email, exclude email/password from update)
 exports.updatePatient = async (req, res) => {
   try {
-    const patientId = req.patientId; // from auth middleware
-    const updates = { ...req.body };
+    const { email, ...updates } = req.body;
+    if (!email) {
+      return res.status(400).json({ message: 'Email is required to update patient profile.' });
+    }
 
     // Disallow updating email and password
     delete updates.email;
     delete updates.password;
 
-    const updatedPatient = await Patient.findByIdAndUpdate(
-      patientId,
+    const updatedPatient = await Patient.findOneAndUpdate(
+      { email },
       { $set: updates },
       { new: true, runValidators: true }
     ).select('-password'); // Exclude password from response
