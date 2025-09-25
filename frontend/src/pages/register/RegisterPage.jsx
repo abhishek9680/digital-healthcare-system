@@ -29,6 +29,7 @@ const RegisterPage = () => {
 			if (role === 'doctor') {
 				await registerDoctor(form);
 			} else {
+				form.gender = "Not specified";
 				await registerPatient(form);
 			}
 			setSuccess('Registration successful! Please login.');
