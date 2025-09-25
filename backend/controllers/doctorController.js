@@ -82,6 +82,7 @@ exports.login = async (req, res) => {
 exports.updateDoctor = async (req, res) => {
   try {
     const { email, ...updates } = req.body;
+
     if (!email) {
       return res.status(400).json({ message: 'Email is required to update doctor profile.' });
     }
@@ -203,3 +204,19 @@ exports.getAllDoctors = async (req, res) => {
     res.status(500).json({ message: 'Server error while fetching doctors' });
   }
 };
+
+
+exports.getProfile = async (req, res) => {
+  const email = req.query.email;
+  try {
+    const doctor = await Doctor.findOne({email}).select('-password');
+
+    res.status(200).json({
+      message: 'Doctor profile fetched successfully',
+      doctor,
+     });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error while fetching doctor profile' });
+  }
+}

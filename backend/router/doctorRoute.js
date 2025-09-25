@@ -21,4 +21,7 @@ router.get('/api/appointments/booked', authMiddleware, doctorController.getBooke
 // Update appointment status (accept/reject)
 router.patch('/api/appointments/:appointmentId/status', authMiddleware, doctorController.updateAppointmentStatus);
 
+// Doctor dashboard routes
+router.get('/api/doctors/profile', authMiddleware, doctorController.getProfile);
+
 module.exports = router;

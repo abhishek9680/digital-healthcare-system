@@ -58,8 +58,10 @@ export const getAllDoctors = async () => {
   return res.data.doctors;
 };
 export const getDoctorProfile = async (token) => {
-  return axios.get(`${BASE_URL}/doctor/profile`, {
+  const email = JSON.parse(localStorage.getItem('user'))?.email;
+  return axios.get(`${BASE_URL}/doctors/profile`, {
     headers: { Authorization: `Bearer ${token}` },
+    params: { email },
   });
 };
 
@@ -94,6 +96,14 @@ export const updatePatientProfile = async (token, profileData) => {
     headers: { Authorization: `Bearer ${token}` },
   });
   return res.data.patient;
+};
+
+// Update doctor profile
+export const updateDoctorProfile = async (token, profileData) => {
+  const res = await axios.put(`${BASE_URL}/doctors/update`, profileData, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return res.data.doctor;
 };
 
 // Logout utility

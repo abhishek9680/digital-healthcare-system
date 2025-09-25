@@ -1,46 +1,15 @@
-import React, { useState } from "react";
+import { useState , useEffect} from "react";
+import { getDoctorProfile, updateDoctorProfile } from '../../api';
 
-// Mock data for demonstration
-const mockAppointments = [
-	{
-		id: 1,
-		patient: "Rohan Sharma",
-		date: "2025-09-27",
-		time: "10:00 AM",
-		status: "pending",
-		reason: "General Checkup",
-	},
-	{
-		id: 2,
-		patient: "Rahul Verma",
-		date: "2025-09-28",
-		time: "2:30 PM",
-		status: "pending",
-		reason: "Consultation",
-	},
-	{
-		id: 3,
-		patient: "Sneha Kapoor",
-		date: "2025-09-29",
-		time: "11:15 AM",
-		status: "accepted",
-		reason: "Follow-up",
-	},
-];
+
+// ...existing code...
 
 
 const Doctordashboard = () => {
-	const [appointments, setAppointments] = useState(mockAppointments);
-	// Dummy profile data
-
-	const [profile, setProfile] = useState({
-		name: 'Dr. Vijay Kumar',
-		specialty: 'Cardiologist',
-		worksAt: 'Govt.Central Hospital',
-		experience: '10 years',
-	});
+	const [appointments, setAppointments] = useState([]);
+	const [profile, setProfile] = useState(null);
 	const [editing, setEditing] = useState(false);
-	const [editProfile, setEditProfile] = useState(profile);
+	const [editProfile, setEditProfile] = useState(null);
 
 	const handleProfileChange = (e) => {
 		setEditProfile({ ...editProfile, [e.target.name]: e.target.value });
@@ -51,9 +20,24 @@ const Doctordashboard = () => {
 		setEditing(true);
 	};
 
-	const handleSave = () => {
-		setProfile(editProfile);
-		setEditing(false);
+	const handleSave = async () => {
+		try {
+			const token = localStorage.getItem('token');
+			const updated = await updateDoctorProfile(token, {
+				...editProfile,
+				email: profile.email,
+			});
+			setProfile({
+				name: updated.name,
+				speciality: updated.speciality || updated.speciality,
+				worksAt: updated.worksAt || '',
+				experience: updated.experience || '',
+				email: updated.email,
+			});
+			setEditing(false);
+		} catch (err) {
+			// Optionally show error to user
+		}
 	};
 
 	const handleCancel = () => {
@@ -72,75 +56,102 @@ const Doctordashboard = () => {
 	const pending = appointments.filter((a) => a.status === "pending");
 	const scheduled = appointments.filter((a) => a.status === "accepted");
 
+
+
+		useEffect(() => {
+			const fetchProfile = async () => {
+				try {
+					const token = localStorage.getItem('token');
+					const res = await getDoctorProfile(token);
+					const doctor = res.data?.doctor || res.data;
+					setProfile({
+						name: doctor.name,
+						speciality: doctor.speciality || doctor.speciality,
+						worksAt: doctor.worksAt || '',
+						experience: doctor.experience || '',
+						email: doctor.email,
+					});
+					setEditProfile({
+						name: doctor.name,
+						speciality: doctor.speciality || doctor.speciality,
+						worksAt: doctor.worksAt || '',
+						experience: doctor.experience || '',
+						email: doctor.email,
+					});
+				} catch (err) {
+					// handle error
+				}
+			};
+			fetchProfile();
+		}, []);
+
 	return (
 		<div className="min-h-screen bg-base-100 p-6">
 			<h1 className="text-3xl font-bold mb-8 text-primary">Doctor Dashboard</h1>
-
-
-						{/* Profile Section */}
-						<div className="mb-10 bg-white p-6 rounded-lg shadow max-w-xl mx-auto">
-							<h2 className="text-2xl font-semibold mb-4">Profile</h2>
-							{editing ? (
-								<form className="grid grid-cols-1 gap-3 mb-2" onSubmit={e => { e.preventDefault(); handleSave(); }}>
-									<label>
-										<span className="font-medium">Name:</span>
-										<input
-											type="text"
-											name="name"
-											className="input input-bordered w-full mt-1"
-											value={editProfile.name}
-											onChange={handleProfileChange}
-											required
-										/>
-									</label>
-									<label>
-										<span className="font-medium">Specialty:</span>
-										<input
-											type="text"
-											name="specialty"
-											className="input input-bordered w-full mt-1"
-											value={editProfile.specialty}
-											onChange={handleProfileChange}
-											required
-										/>
-									</label>
-									<label>
-										<span className="font-medium">Works At:</span>
-										<input
-											type="text"
-											name="worksAt"
-											className="input input-bordered w-full mt-1"
-											value={editProfile.worksAt}
-											onChange={handleProfileChange}
-											required
-										/>
-									</label>
-									<label>
-										<span className="font-medium">Experience:</span>
-										<input
-											type="text"
-											name="experience"
-											className="input input-bordered w-full mt-1"
-											value={editProfile.experience}
-											onChange={handleProfileChange}
-											required
-										/>
-									</label>
-									<div className="flex gap-2 mt-2">
-										<button type="submit" className="btn btn-primary">Save</button>
-										<button type="button" className="btn btn-outline" onClick={handleCancel}>Cancel</button>
-									</div>
-								</form>
-							) : (
-								<div className="grid grid-cols-1 gap-2">
-									<div><span className="font-medium">Name:</span> {profile.name}</div>
-									<div><span className="font-medium">Specialty:</span> {profile.specialty}</div>
-									<div><span className="font-medium">Works At:</span> {profile.worksAt}</div>
-									<div><span className="font-medium">Experience:</span> {profile.experience}</div>
-									<button className="btn btn-secondary mt-2 w-fit" onClick={handleEdit}>Edit</button>
-								</div>
-							)}
+			{/* Profile Section */}
+			<div className="mb-10 bg-white p-6 rounded-lg shadow max-w-xl mx-auto">
+				<h2 className="text-2xl font-semibold mb-4">Profile</h2>
+				{editing ? (
+					<form className="grid grid-cols-1 gap-3 mb-2" onSubmit={e => { e.preventDefault(); handleSave(); }}>
+						<label>
+							<span className="font-medium">Name:</span>
+							<input
+								type="text"
+								name="name"
+								className="input input-bordered w-full mt-1"
+								value={editProfile?.name || ''}
+								onChange={handleProfileChange}
+								required
+							/>
+						</label>
+						<label>
+							<span className="font-medium">speciality:</span>
+							<input
+								type="text"
+								name="speciality"
+								className="input input-bordered w-full mt-1"
+								value={editProfile?.speciality || ''}
+								onChange={handleProfileChange}
+								required
+							/>
+						</label>
+						<label>
+							<span className="font-medium">Works At:</span>
+							<input
+								type="text"
+								name="worksAt"
+								className="input input-bordered w-full mt-1"
+								value={editProfile?.worksAt || ''}
+								onChange={handleProfileChange}
+								required
+							/>
+						</label>
+						<label>
+							<span className="font-medium">Experience:</span>
+							<input
+								type="text"
+								name="experience"
+								className="input input-bordered w-full mt-1"
+								value={editProfile?.experience || ''}
+								onChange={handleProfileChange}
+								required
+							/>
+						</label>
+						<div className="flex gap-2 mt-2">
+							<button type="submit" className="btn btn-primary">Save</button>
+							<button type="button" className="btn btn-outline" onClick={handleCancel}>Cancel</button>
 						</div>
+					</form>
+				) : (
+					<div className="grid grid-cols-1 gap-2">
+						<div><span className="font-medium">Name:</span> {profile?.name}</div>
+						<div><span className="font-medium">speciality:</span> {profile?.speciality}</div>
+						<div><span className="font-medium">Works At:</span> {profile?.worksAt}</div>
+						<div><span className="font-medium">Experience:</span> {profile?.experience}</div>
+						<button className="btn btn-secondary mt-2 w-fit" onClick={handleEdit}>Edit</button>
+					</div>
+				)}
+			</div>
 
 			{/* Pending Appointments */}
 			<div className="mb-10">
