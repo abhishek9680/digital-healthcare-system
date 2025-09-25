@@ -8,7 +8,6 @@ const patientSchema = new mongoose.Schema({
   address: { type: String },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  // Add more fields as needed
 }, { timestamps: true });
 
 module.exports = mongoose.model('Patient', patientSchema);

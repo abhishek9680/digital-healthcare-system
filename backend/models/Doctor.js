@@ -7,7 +7,6 @@ const doctorSchema = new mongoose.Schema({
   experience: { type: String },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  // Add more fields as needed
 }, { timestamps: true });
 
 module.exports = mongoose.model('Doctor', doctorSchema);
