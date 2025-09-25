@@ -14,7 +14,7 @@ router.get('/api/doctors/all', doctorController.getAllDoctors);
 // Protected routes (require authentication)
 router.put('/api/doctors/update', authMiddleware, doctorController.updateDoctor);
 
-// Appointment routes
+// Appointment routes for doctor
 router.get('/api/appointments/doctor', authMiddleware, doctorController.getAppointmentsForDoctor);
 router.get('/api/appointments/booked', authMiddleware, doctorController.getBookedAppointments);
 

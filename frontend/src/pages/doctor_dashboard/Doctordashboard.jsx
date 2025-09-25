@@ -1,8 +1,5 @@
 import { useState , useEffect} from "react";
-import { getDoctorProfile, updateDoctorProfile } from '../../api';
-
-
-// ...existing code...
+import { getDoctorProfile, updateDoctorProfile, getDoctorAppointments, updateAppointmentStatus } from '../../api';
 
 
 const Doctordashboard = () => {
@@ -45,45 +42,53 @@ const Doctordashboard = () => {
 		setEditing(false);
 	};
 
-	const handleAction = (id, action) => {
-		setAppointments((prev) =>
-			prev.map((appt) =>
-				appt.id === id ? { ...appt, status: action } : appt
-			)
-		);
+	// Fetch appointments and profile on mount
+	useEffect(() => {
+		const fetchData = async () => {
+			try {
+				const token = localStorage.getItem('token');
+				// Fetch doctor profile
+				const res = await getDoctorProfile(token);
+				const doctor = res.data?.doctor || res.data;
+				setProfile({
+					name: doctor.name,
+					speciality: doctor.speciality || doctor.speciality,
+					worksAt: doctor.worksAt || '',
+					experience: doctor.experience || '',
+					email: doctor.email,
+				});
+				setEditProfile({
+					name: doctor.name,
+					speciality: doctor.speciality || doctor.speciality,
+					worksAt: doctor.worksAt || '',
+					experience: doctor.experience || '',
+					email: doctor.email,
+				});
+				// Fetch appointments
+				const appointmentsRes = await getDoctorAppointments(token);
+				setAppointments(appointmentsRes);
+			} catch (err) {
+				// handle error
+			}
+		};
+		fetchData();
+	}, []);
+
+	// Approve/Reject appointment
+	const handleAction = async (id, action) => {
+		try {
+			const token = localStorage.getItem('token');
+			await updateAppointmentStatus(token, id, action === 'accepted' ? 'booked' : 'rejected');
+			// Refresh appointments
+			const appointmentsRes = await getDoctorAppointments(token);
+			setAppointments(appointmentsRes);
+		} catch (err) {
+			// handle error
+		}
 	};
 
 	const pending = appointments.filter((a) => a.status === "pending");
-	const scheduled = appointments.filter((a) => a.status === "accepted");
-
-
-
-		useEffect(() => {
-			const fetchProfile = async () => {
-				try {
-					const token = localStorage.getItem('token');
-					const res = await getDoctorProfile(token);
-					const doctor = res.data?.doctor || res.data;
-					setProfile({
-						name: doctor.name,
-						speciality: doctor.speciality || doctor.speciality,
-						worksAt: doctor.worksAt || '',
-						experience: doctor.experience || '',
-						email: doctor.email,
-					});
-					setEditProfile({
-						name: doctor.name,
-						speciality: doctor.speciality || doctor.speciality,
-						worksAt: doctor.worksAt || '',
-						experience: doctor.experience || '',
-						email: doctor.email,
-					});
-				} catch (err) {
-					// handle error
-				}
-			};
-			fetchProfile();
-		}, []);
+	const scheduled = appointments.filter((a) => a.status === "booked");
 
 	return (
 		<div className="min-h-screen bg-base-100 p-6">
@@ -172,21 +177,21 @@ const Doctordashboard = () => {
 							</thead>
 							<tbody>
 								{pending.map((appt) => (
-									<tr key={appt.id}>
-										<td>{appt.patient}</td>
-										<td>{appt.date}</td>
-										<td>{appt.time}</td>
-										<td>{appt.reason}</td>
+									<tr key={appt._id}>
+										<td>{appt.patientEmail}</td>
+										<td>{new Date(appt.appointmentDate).toLocaleDateString()}</td>
+										<td>{new Date(appt.appointmentDate).toLocaleTimeString()}</td>
+										<td>{appt.reason || '-'}</td>
 										<td className="flex gap-2">
 											<button
 												className="btn btn-success btn-xs"
-												onClick={() => handleAction(appt.id, "accepted")}
+												onClick={() => handleAction(appt._id, "accepted")}
 											>
 												Accept
 											</button>
 											<button
 												className="btn btn-error btn-xs"
-												onClick={() => handleAction(appt.id, "rejected")}
+												onClick={() => handleAction(appt._id, "rejected")}
 											>
 												Reject
 											</button>
@@ -217,11 +222,11 @@ const Doctordashboard = () => {
 							</thead>
 							<tbody>
 								{scheduled.map((appt) => (
-									<tr key={appt.id}>
-										<td>{appt.patient}</td>
-										<td>{appt.date}</td>
-										<td>{appt.time}</td>
-										<td>{appt.reason}</td>
+									<tr key={appt._id}>
+										<td>{appt.patientEmail}</td>
+										<td>{new Date(appt.appointmentDate).toLocaleDateString()}</td>
+										<td>{new Date(appt.appointmentDate).toLocaleTimeString()}</td>
+										<td>{appt.reason || '-'}</td>
 									</tr>
 								))}
 							</tbody>

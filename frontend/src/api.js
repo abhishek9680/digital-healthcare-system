@@ -91,6 +91,17 @@ export const bookAppointment = async (token, doctorEmail, appointmentDate, patie
   return res.data.appointment;
 };
 
+// Get all appointments for doctor
+export const getDoctorAppointments = async (token) => {
+  const user = JSON.parse(localStorage.getItem('user'));
+  const doctorEmail = user?.email;
+  const res = await axios.get(`${BASE_URL}/appointments/doctor`, {
+    headers: { Authorization: `Bearer ${token}` },
+    params: { doctorEmail },
+  });
+  return res.data.appointments;
+};
+
 // Update patient profile
 export const updatePatientProfile = async (token, profileData) => {
   const res = await axios.put(`${BASE_URL}/patients/update`, profileData, {
@@ -105,6 +116,18 @@ export const updateDoctorProfile = async (token, profileData) => {
     headers: { Authorization: `Bearer ${token}` },
   });
   return res.data.doctor;
+};
+
+// Update appointment status (approve/reject)
+export const updateAppointmentStatus = async (token, appointmentId, status) => {
+  const user = JSON.parse(localStorage.getItem('user'));
+  const doctorEmail = user?.email;
+  const res = await axios.patch(
+    `${BASE_URL}/appointments/${appointmentId}/status`,
+    { status, doctorEmail },
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+  return res.data.appointment;
 };
 
 // Logout utility
