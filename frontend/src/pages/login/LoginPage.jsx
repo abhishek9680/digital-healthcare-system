@@ -24,6 +24,9 @@ function LoginPage() {
       if (role === 'doctor') {
         data = await loginDoctor(email, password);
         localStorage.setItem('token', data.token);
+        if (!data.doctor.speciality){
+          data.doctor.speciality = "default";
+        }
         localStorage.setItem('user', JSON.stringify(data.doctor));
         navigate('/doctor-dashboard');
       } else {

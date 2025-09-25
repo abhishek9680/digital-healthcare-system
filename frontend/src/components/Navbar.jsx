@@ -8,8 +8,9 @@ function Navbar() {
     const token = localStorage.getItem('token');
     const user = JSON.parse(localStorage.getItem('user') || 'null');
     const isLoggedIn = !!token;
-    // Determine user role based on user object
-    const userRole = user?.specialty ? 'doctor' : (user ? 'patient' : null);
+    // Identify doctor by presence of 'speciality' or 'speciality' property
+    console.log(user);
+    const isDoctor = Boolean(user?.speciality || user?.speciality);
 
     const handleLogout = () => {
         logout();
@@ -20,11 +21,13 @@ function Navbar() {
     const commonLinks = [
         { to: '/', label: 'Home' },
     ];
-    // Dashboard links based on role
-    const dashboardLinks = [
-        userRole === 'doctor' && { to: '/doctor-dashboard', label: 'Doctor Dashboard' },
-        userRole === 'patient' && { to: '/patient-dashboard', label: 'Patient Dashboard' },
-    ].filter(Boolean);
+    // Dashboard link based on specialization
+    const dashboardLinks = [];
+    if (isDoctor) {
+        dashboardLinks.push({ to: '/doctor-dashboard', label: 'Doctor Dashboard' });
+    } else if (user) {
+        dashboardLinks.push({ to: '/patient-dashboard', label: 'Patient Dashboard' });
+    }
     // Auth links
     const authLinks = [
         !isLoggedIn && { to: '/login', label: 'Login' },
@@ -32,7 +35,7 @@ function Navbar() {
     ].filter(Boolean);
 
     return (
-        <div className="navbar bg-base-100 shadow-sm">
+        <div className="navbar bg-base-100 shadow-sm sticky top-0 z-10">
             <div className="navbar-start">
                 <div className="dropdown">
                     <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden">

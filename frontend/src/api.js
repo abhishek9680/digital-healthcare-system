@@ -16,6 +16,7 @@ export const loginDoctor = async (email, password) => {
   try {
     const res = await axios.post(`${BASE_URL}/doctors/login`, { email, password });
     return res.data; // { token, doctor }
+
   } catch (err) {
     throw err.response?.data || { message: 'Login failed' };
   }
