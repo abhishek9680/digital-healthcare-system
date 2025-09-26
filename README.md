@@ -1,7 +1,7 @@
 
 # Digital Healthcare Management System
 
-![Logo](public/logo.jpg)
+![Logo](frontend/public/logo.jpg)
 
 A modern MERN stack application for managing healthcare appointments, with separate dashboards for patients and doctors. Built with React, Node.js, Express, MongoDB, Tailwind CSS, and daisyUI.
 
