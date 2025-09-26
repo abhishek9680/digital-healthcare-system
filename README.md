@@ -51,13 +51,13 @@ project-root/
 
 ### Prerequisites
 - Node.js (v18+ recommended)
-- MongoDB (local or Atlas)
-- pnpm (or npm/yarn)
-
+- MongoDB (Atlas)
+- pnpm (npm)
+- React.js
 ### 1. Clone the repository
 ```sh
 # Using HTTPS
-git clone https://github.com/your-username/digital-healthcare-system.git
+git clone https://github.com/abhishek9680/digital-healthcare-system
 cd digital-healthcare-system
 ```
 
@@ -104,12 +104,7 @@ PORT=3000
 ## 🤝 Contributing
 Pull requests are welcome! For major changes, please open an issue first to discuss what you would like to change.
 
----
 
-## 📄 License
-[MIT](LICENSE)
-
----
 
 ## 💡 Credits
 - [React](https://react.dev/)
