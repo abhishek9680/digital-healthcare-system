@@ -79,11 +79,7 @@ function Navbar() {
             <div className="navbar-end">
                 {isLoggedIn ? (
                     <div className="flex items-center gap-2">
-                        {/* <div className="avatar placeholder">
-                            <div className="bg-neutral text-neutral-content rounded-full w-8">
-                                <span>{user?.name ? user.name[0].toUpperCase() : 'U'}</span>
-                            </div>
-                        </div> */}
+                        {/* */}
                         <button className="btn btn-error btn-sm" onClick={handleLogout}>Logout</button>
                     </div>
                 ) : (
