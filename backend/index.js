@@ -16,10 +16,12 @@ app.use(express.json());
 // Routers
 const doctorRouter = require('./router/doctorRoute');
 const patientRouter = require('./router/patientRoute');
+const adminRouter = require('./router/adminRoute');
 // TODO: Add patientRouter when available
 
 app.use(doctorRouter);
 app.use(patientRouter);
+app.use(adminRouter);
 // Start server only after DB connection
 const startServer = async () => {
   await connectDB();

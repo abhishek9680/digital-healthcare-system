@@ -8,9 +8,11 @@ function Navbar() {
     const token = localStorage.getItem('token');
     const user = JSON.parse(localStorage.getItem('user') || 'null');
     const isLoggedIn = !!token;
-    // Identify doctor by presence of 'speciality' or 'speciality' property
-    console.log(user);
-    const isDoctor = Boolean(user?.speciality || user?.speciality);
+    // Identify user role
+    const role = user?.role;
+    const isDoctor = role === 'doctor';
+    const isPatient = role === 'patient';
+    const isAdmin = role === 'admin';
 
     const handleLogout = () => {
         logout();
@@ -21,12 +23,14 @@ function Navbar() {
     const commonLinks = [
         { to: '/', label: 'Home' },
     ];
-    // Dashboard link based on specialization
+    // Dashboard link based on role
     const dashboardLinks = [];
     if (isDoctor) {
         dashboardLinks.push({ to: '/doctor-dashboard', label: 'Doctor Dashboard' });
-    } else if (user) {
+    } else if (isPatient) {
         dashboardLinks.push({ to: '/patient-dashboard', label: 'Patient Dashboard' });
+    } else if (isAdmin) {
+        dashboardLinks.push({ to: '/admin-dashboard', label: 'Admin Dashboard' });
     }
     // Auth links
     const authLinks = [
@@ -60,7 +64,6 @@ function Navbar() {
                 </div>
                 <Link to="/" className="flex items-center gap-2 btn btn-ghost text-xl">
                     <img src="/logo.jpg" alt="Logo" className="h-8 w-8" />
-                    
                 </Link>
             </div>
             <div className="navbar-center hidden lg:flex">
@@ -79,7 +82,7 @@ function Navbar() {
             <div className="navbar-end">
                 {isLoggedIn ? (
                     <div className="flex items-center gap-2">
-                        {/* */}
+                        <span className="font-semibold text-sm">{user?.name} ({role})</span>
                         <button className="btn btn-error btn-sm" onClick={handleLogout}>Logout</button>
                     </div>
                 ) : (

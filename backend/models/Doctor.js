@@ -7,6 +7,8 @@ const doctorSchema = new mongoose.Schema({
   experience: { type: String },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
+  // Admin approval flag. New registrations default to not approved.
+  approved: { type: Boolean, default: false },
 }, { timestamps: true });
 
 module.exports = mongoose.model('Doctor', doctorSchema);

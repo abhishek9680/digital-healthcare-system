@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { registerPatient, registerDoctor } from '../../api';
+import { registerPatient, registerDoctor, registerAdmin } from '../../api';
 import { useNavigate } from 'react-router-dom';
 
 const RegisterPage = () => {
@@ -10,8 +10,8 @@ const RegisterPage = () => {
 	const [success, setSuccess] = useState('');
 	const navigate = useNavigate();
 
-	const toggleRole = () => {
-		setRole((prev) => (prev === 'doctor' ? 'patient' : 'doctor'));
+	const handleRoleChange = (newRole) => {
+		setRole(newRole);
 		setError('');
 		setSuccess('');
 	};
@@ -28,9 +28,12 @@ const RegisterPage = () => {
 		try {
 			if (role === 'doctor') {
 				await registerDoctor(form);
-			} else {
-				form.gender = "Not specified";
-				await registerPatient(form);
+			} else if (role === 'patient') {
+				const payload = { ...form, gender: 'Not specified' };
+				await registerPatient(payload);
+			} else if (role === 'admin') {
+				// Register admin (ensure backend endpoint exists)
+				await registerAdmin(form);
 			}
 			setSuccess('Registration successful! Please login.');
 			setTimeout(() => navigate('/login'), 1500);
@@ -43,7 +46,15 @@ const RegisterPage = () => {
 	return (
 		<div className="flex flex-col items-center justify-center min-h-screen bg-base-200">
 			<div className="bg-white p-8 rounded-lg shadow-md w-full max-w-sm">
-				<h2 className="text-2xl font-bold mb-4 text-center">{role === 'doctor' ? 'Doctor' : 'Patient'} Registration</h2>
+				<h2 className="text-2xl font-bold mb-4 text-center">{role.charAt(0).toUpperCase() + role.slice(1)} Registration</h2>
+
+				{/* Role selection tabs */}
+				<div className="tabs tabs-boxed mb-4">
+					<button className={`tab ${role === 'doctor' ? 'tab-active' : ''}`} onClick={() => handleRoleChange('doctor')}>Doctor</button>
+					<button className={`tab ${role === 'patient' ? 'tab-active' : ''}`} onClick={() => handleRoleChange('patient')}>Patient</button>
+					<button className={`tab ${role === 'admin' ? 'tab-active' : ''}`} onClick={() => handleRoleChange('admin')}>Admin</button>
+				</div>
+
 				<form className="flex flex-col gap-4" onSubmit={handleSubmit}>
 					<input
 						type="text"
@@ -78,13 +89,6 @@ const RegisterPage = () => {
 					{error && <div className="text-red-500 text-center text-sm">{error}</div>}
 					{success && <div className="text-green-500 text-center text-sm">{success}</div>}
 				</form>
-				<button
-					className="btn btn-outline btn-secondary mt-4 w-full"
-					onClick={toggleRole}
-					type="button"
-				>
-					Switch to {role === 'doctor' ? 'Patient' : 'Doctor'} Registration
-				</button>
 				<div className="text-center mt-4">
 					<span>Already have an account? </span>
 					<a href="/login" className="link link-primary">Login</a>

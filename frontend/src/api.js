@@ -41,6 +41,16 @@ export const registerDoctor = async (doctorData) => {
   }
 };
 
+// Register admin (frontend will call this when admin registration is available)
+export const registerAdmin = async (adminData) => {
+  try {
+    const res = await axios.post(`${BASE_URL}/admin/register`, adminData);
+    return res.data;
+  } catch (err) {
+    throw err.response?.data || { message: 'Admin registration failed' };
+  }
+};
+
 // Get patient profile
 export const getPatientProfile = async (token) => {
   const user = JSON.parse(localStorage.getItem('user'));
@@ -77,6 +87,93 @@ export const getPatientAppointments = async (token) => {
   const appointments = res.data.appointments;
 
   return appointments;
+};
+
+// Admin APIs
+export const loginAdmin = async (email, password) => {
+  try {
+    const res = await axios.post(`${BASE_URL}/admin/login`, { email, password });
+    return res.data; // { token, admin }
+  } catch (err) {
+    throw err.response?.data || { message: 'Admin login failed' };
+  }
+};
+
+export const getAllPatients = async (token) => {
+  try {
+    const res = await axios.get(`${BASE_URL}/admin/patients`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return res.data.patients;
+  } catch (err) {
+    throw err.response?.data || { message: 'Failed to fetch patients' };
+  }
+};
+
+export const deleteDoctor = async (token, doctorId) => {
+  try {
+    const res = await axios.delete(`${BASE_URL}/admin/doctors/${doctorId}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return res.data;
+  } catch (err) {
+    throw err.response?.data || { message: 'Failed to delete doctor' };
+  }
+};
+
+export const deletePatient = async (token, patientId) => {
+  try {
+    const res = await axios.delete(`${BASE_URL}/admin/patients/${patientId}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return res.data;
+  } catch (err) {
+    throw err.response?.data || { message: 'Failed to delete patient' };
+  }
+};
+
+export const approveDoctor = async (token, doctorId) => {
+  try {
+    const res = await axios.put(`${BASE_URL}/admin/doctors/${doctorId}/approve`, {}, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return res.data;
+  } catch (err) {
+    throw err.response?.data || { message: 'Failed to approve doctor' };
+  }
+};
+
+export const rejectDoctor = async (token, doctorId) => {
+  try {
+    const res = await axios.put(`${BASE_URL}/admin/doctors/${doctorId}/reject`, {}, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return res.data;
+  } catch (err) {
+    throw err.response?.data || { message: 'Failed to reject doctor' };
+  }
+};
+
+export const getDoctorRegistrationRequests = async (token) => {
+  try {
+    const res = await axios.get(`${BASE_URL}/admin/doctors/pending`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return res.data.doctors;
+  } catch (err) {
+    throw err.response?.data || { message: 'Failed to fetch pending doctors' };
+  }
+};
+
+export const getAdminStats = async (token) => {
+  try {
+    const res = await axios.get(`${BASE_URL}/admin/stats`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return res.data;
+  } catch (err) {
+    throw err.response?.data || { message: 'Failed to fetch admin statistics' };
+  }
 };
 
 // Book appointment

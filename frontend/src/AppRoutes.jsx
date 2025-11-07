@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Patientdashboard from "./pages/patient_dashboard/Patientdashboard";
 import Doctordashboard from "./pages/doctor_dashboard/Doctordashboard";
+import AdminDashboard from "./pages/admin_dashboard/AdminDashboard";
 
 export default function AppRouter() {
   return (
@@ -24,6 +25,11 @@ export default function AppRouter() {
           <Route path="/doctor-dashboard" element={
             <ProtectedRoute>
               <Doctordashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/admin-dashboard" element={
+            <ProtectedRoute>
+              <AdminDashboard />
             </ProtectedRoute>
           } />
 
