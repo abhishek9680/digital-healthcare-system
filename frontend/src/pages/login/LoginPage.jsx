@@ -98,13 +98,11 @@ function LoginPage() {
           {error && <div className="text-red-500 text-center text-sm">{error}</div>}
         </form>
 
-        {/* Only show registration link for doctors and patients */}
-        {role !== 'admin' && (
-          <div className="text-center mt-4">
-            <span>New? </span>
-            <a href={`/register?role=${role}`} className="link link-primary">Sign up</a>
-          </div>
-        )}
+        {/* Show registration link for all roles (doctor, patient, admin) */}
+        <div className="text-center mt-4">
+          <span>New? </span>
+          <a href={`/register?role=${role}`} className="link link-primary">Sign up</a>
+        </div>
       </div>
     </div>
   );
