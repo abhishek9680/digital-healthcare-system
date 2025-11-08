@@ -25,7 +25,7 @@ const AdminDashboard = () => {
     const [pendingDoctors, setPendingDoctors] = useState([
         // { _id: 'pd1', name: 'Dr. New One', email: 'new.one@example.com', speciality: 'Pediatrics', experience: '2 years' },
     ]);
-    const [stats, setStats] = useState({ totalDoctors: 3, totalPatients: 3 });
+    const [stats, setStats] = useState({ totalDoctors: 0, totalPatients: 0, pending: 0 });
     const [activeTab, setActiveTab] = useState('doctors'); // 'doctors' or 'patients' or 'pending'
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -132,8 +132,9 @@ const AdminDashboard = () => {
             {stats && (
                 <div className="stats shadow mb-8">
                     <div className="stat">
-                        <div className="stat-title">Total Doctors</div>
-                        <div className="stat-value">{stats.totalDoctors}</div>
+                        <div className="stat-title">Total Doctors (Approved)</div>
+                        {/* Show approved doctors = totalDoctors - pending */}
+                        <div className="stat-value">{Math.max(0, (stats.totalDoctors || 0) - (stats.pending ?? pendingDoctors.length))}</div>
                     </div>
                     <div className="stat">
                         <div className="stat-title">Total Patients</div>
@@ -141,7 +142,7 @@ const AdminDashboard = () => {
                     </div>
                     <div className="stat">
                         <div className="stat-title">Pending Approvals</div>
-                        <div className="stat-value">{pendingDoctors.length}</div>
+                        <div className="stat-value">{stats.pending ?? pendingDoctors.length}</div>
                     </div>
                 </div>
             )}
