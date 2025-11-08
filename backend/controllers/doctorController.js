@@ -24,17 +24,16 @@ exports.register = async (req, res) => {
     });
 
     await doctor.save();
-
-    const token = jwt.sign({ doctorId: doctor._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-
+    // Do NOT issue token yet — doctor must be approved by an admin first.
+    // Save returns doctor with `approved` defaulting to false per schema.
     res.status(201).json({
-      message: 'Doctor registered successfully',
-      token,
+      message: 'Doctor registered successfully. Your account is pending admin approval.',
       doctor: {
         id: doctor._id,
         name: doctor.name,
         email: doctor.email,
-        speciality: doctor.speciality || null
+        speciality: doctor.speciality || null,
+        approved: doctor.approved
       },
     });
   } catch (error) {
@@ -58,6 +57,11 @@ exports.login = async (req, res) => {
     const isMatch = await bcrypt.compare(password, doctor.password);
     if (!isMatch) {
       return res.status(400).json({ message: 'Invalid credentials' });
+    }
+
+    // Ensure doctor has been approved by an admin before allowing login
+    if (!doctor.approved) {
+      return res.status(403).json({ message: 'Account pending admin approval' });
     }
 
     const token = jwt.sign({ doctorId: doctor._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
@@ -193,7 +197,8 @@ exports.updateAppointmentStatus = async (req, res) => {
 // Get all doctors (unprotected)
 exports.getAllDoctors = async (req, res) => {
   try {
-    const doctors = await Doctor.find().select('-password');
+    // Only return doctors that have been approved by admin
+    const doctors = await Doctor.find({ approved: true }).select('-password');
     res.status(200).json({
       message: 'Doctors fetched successfully',
       total: doctors.length,

@@ -26,17 +26,20 @@ const RegisterPage = () => {
 		setError('');
 		setSuccess('');
 		try {
+			let res;
 			if (role === 'doctor') {
-				await registerDoctor(form);
+				res = await registerDoctor(form);
 			} else if (role === 'patient') {
 				const payload = { ...form, gender: 'Not specified' };
-				await registerPatient(payload);
+				res = await registerPatient(payload);
 			} else if (role === 'admin') {
 				// Register admin (ensure backend endpoint exists)
-				await registerAdmin(form);
+				res = await registerAdmin(form);
 			}
-			setSuccess('Registration successful! Please login.');
-			setTimeout(() => navigate('/login'), 1500);
+			// Use backend-provided message if available (doctor may get pending-approval notice)
+			setSuccess(res?.message || 'Registration successful! Please login.');
+			// If registration was for doctor, keep on the page to show pending message but still navigate to login after a short delay
+			setTimeout(() => navigate('/login'), 1800);
 		} catch (err) {
 			setError(err.message || 'Registration failed');
 		}
