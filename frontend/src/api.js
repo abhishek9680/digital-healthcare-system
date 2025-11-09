@@ -176,6 +176,30 @@ export const getAdminStats = async (token) => {
   }
 };
 
+// Get admin profile
+export const getAdminProfile = async (token) => {
+  try {
+    const res = await axios.get(`${BASE_URL}/admin/profile`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return res.data.admin;
+  } catch (err) {
+    throw err.response?.data || { message: 'Failed to fetch admin profile' };
+  }
+};
+
+// Update admin profile
+export const updateAdminProfile = async (token, profileData) => {
+  try {
+    const res = await axios.put(`${BASE_URL}/admin/profile`, profileData, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return res.data.admin;
+  } catch (err) {
+    throw err.response?.data || { message: 'Failed to update admin profile' };
+  }
+};
+
 // Book appointment
 export const bookAppointment = async (token, doctorEmail, appointmentDate, patientEmail) => {
   const res = await axios.post(`${BASE_URL}/appointments/book`, {

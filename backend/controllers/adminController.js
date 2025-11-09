@@ -146,3 +146,47 @@ exports.getStats = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+
+// Get admin profile (protected)
+exports.getProfile = async (req, res) => {
+  try {
+    // adminAuthMiddleware sets req.admin
+    const admin = req.admin;
+    if (!admin) return res.status(404).json({ message: 'Admin not found' });
+    const { _id, name, email, /*designation,*/ gender, dob, contact, isSuperAdmin } = admin;
+    res.status(200).json({ admin: { id: _id, name, email, /*designation,*/ gender, dob, contact, isSuperAdmin, role: 'admin' } });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// Update admin profile (protected)
+exports.updateProfile = async (req, res) => {
+  try {
+    const adminId = req.admin && req.admin._id;
+    if (!adminId) return res.status(401).json({ message: 'Unauthorized' });
+
+    const { name, email, /*designation,*/ gender, dob, contact, password } = req.body;
+    const update = {};
+    if (name) update.name = name;
+    if (email) update.email = email;
+    // if (designation) update.designation = designation;
+    if (gender) update.gender = gender;
+    if (dob) update.dob = dob;
+    if (contact) update.contact = contact;
+    if (password) {
+      const hashed = await bcrypt.hash(password, 10);
+      update.password = hashed;
+    }
+
+    const updated = await Admin.findByIdAndUpdate(adminId, { $set: update }, { new: true }).select('-password');
+    if (!updated) return res.status(404).json({ message: 'Admin not found' });
+
+    const { _id, name: uName, email: uEmail, /*designation: uDesignation,*/ gender: uGender, dob: uDob, contact: uContact, isSuperAdmin } = updated;
+    res.status(200).json({ message: 'Profile updated', admin: { id: _id, name: uName, email: uEmail, /*designation: uDesignation,*/ gender: uGender, dob: uDob, contact: uContact, isSuperAdmin, role: 'admin' } });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+};

@@ -10,6 +10,10 @@ router.post('/api/admin/login', adminController.login);
 // Admin register
 router.post('/api/admin/register', adminController.register);
 
+// Admin profile endpoints
+router.get('/api/admin/profile', adminAuth, adminController.getProfile);
+router.put('/api/admin/profile', adminAuth, adminController.updateProfile);
+
 // Protected admin routes
 router.get('/api/admin/patients', adminAuth, adminController.getAllPatients);
 router.delete('/api/admin/patients/:id', adminAuth, adminController.deletePatient);

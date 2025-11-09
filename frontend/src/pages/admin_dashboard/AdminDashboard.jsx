@@ -7,7 +7,9 @@ import {
     approveDoctor,
     rejectDoctor,
     getDoctorRegistrationRequests,
-    getAdminStats 
+    getAdminStats,
+    getAdminProfile,
+    updateAdminProfile
 } from '../../api';
 
 const AdminDashboard = () => {
@@ -26,6 +28,11 @@ const AdminDashboard = () => {
         // { _id: 'pd1', name: 'Dr. New One', email: 'new.one@example.com', speciality: 'Pediatrics', experience: '2 years' },
     ]);
     const [stats, setStats] = useState({ totalDoctors: 0, totalPatients: 0, pending: 0 });
+    // Read current logged-in admin info from localStorage (if available)
+    const stored = JSON.parse(localStorage.getItem('user') || 'null');
+    const [adminInfo, setAdminInfo] = useState(stored);
+    const [editing, setEditing] = useState(false);
+    const isAdmin = adminInfo?.role === 'admin';
     const [activeTab, setActiveTab] = useState('doctors'); // 'doctors' or 'patients' or 'pending'
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -47,6 +54,20 @@ const AdminDashboard = () => {
                 setPatients(patientsData);
                 setPendingDoctors(pendingDoctorsData);
                 setStats(statsData);
+
+                // Fetch latest admin profile and sync to localStorage
+                try {
+                    if (token) {
+                        const profile = await getAdminProfile(token);
+                        if (profile) {
+                            setAdminInfo(profile);
+                            localStorage.setItem('user', JSON.stringify({ ...profile, role: 'admin' }));
+                        }
+                    }
+                } catch (e) {
+                    // ignore profile fetch errors - already handled by main catch
+                    console.warn('Failed to fetch admin profile', e);
+                }
             } catch (error) {
                 setError(error.message || 'Error fetching data');
                 console.error('Error fetching data:', error);
@@ -127,6 +148,91 @@ const AdminDashboard = () => {
     return (
         <div className="min-h-screen bg-base-100 p-6">
             <h1 className="text-3xl font-bold mb-8 text-primary">Admin Dashboard</h1>
+
+            {/* Admin Profile */}
+            {isAdmin && (
+                <div className="card bg-base-100 shadow mb-6 p-4">
+                    <div className="flex items-start gap-4">
+                        <div className="avatar">
+                            {/* If an avatar URL is present, show the image; otherwise show initials */}
+                            {adminInfo?.avatar ? (
+                                <div className="w-16 h-16 rounded-full overflow-hidden">
+                                    <img src={adminInfo.avatar} alt="Admin avatar" className="object-cover w-full h-full" />
+                                </div>
+                            ) : (
+                                <span className="p-10 ring-2 ring-primary rounded-full text-neutral-content text-2xl font-bold">
+                                    {(() => {
+                                        const name = adminInfo?.name || adminInfo?.email || '';
+                                        if (!name) return 'A';
+                                        const parts = name.trim().split(/\s+/);
+                                        if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+                                        return (parts[0].charAt(0) + parts[1].charAt(0)).toUpperCase();
+                                    })()}
+                                </span>
+                            )}
+                        </div>
+                        <div className="flex-1">
+                            {!editing ? (
+                                <>
+                                    <div className="text-lg font-semibold">{adminInfo?.name || adminInfo?.email || 'Admin'}</div>
+                                    <div className="text-sm text-gray-500">{adminInfo?.email || 'No email provided'}</div>
+                                    <div className="text-sm mt-2">Role: {adminInfo?.role || 'admin'}</div>
+                                    {/* <div className="text-sm">Designation: {adminInfo?.designation || 'Not provided'}</div> */}
+                                    <div className="text-sm">Gender: {adminInfo?.gender || 'Not provided'}</div>
+                                    <div className="text-sm">DOB: {adminInfo?.dob || 'Not provided'}</div>
+                                    <div className="text-sm">Contact: {adminInfo?.contact || 'Not provided'}</div>
+                                    <div className="mt-3">
+                                        <button className="btn btn-sm btn-primary mr-2" onClick={() => setEditing(true)}>Edit</button>
+                                    </div>
+                                </>
+                            ) : (
+                                <div className="space-y-2">
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <input className="input input-bordered" value={adminInfo?.name || ''} onChange={(e) => setAdminInfo(prev => ({ ...prev, name: e.target.value }))} placeholder="Full name" />
+                                        <input className="input input-bordered" value={adminInfo?.email || ''} onChange={(e) => setAdminInfo(prev => ({ ...prev, email: e.target.value }))} placeholder="Email" />
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        {/* <input className="input input-bordered" value={adminInfo?.designation || ''} onChange={(e) => setAdminInfo(prev => ({ ...prev, designation: e.target.value }))} placeholder="Designation" /> */}
+                                        <input className="input input-bordered" value={adminInfo?.contact || ''} onChange={(e) => setAdminInfo(prev => ({ ...prev, contact: e.target.value }))} placeholder="Contact number" />
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <select className="select select-bordered" value={adminInfo?.gender || ''} onChange={(e) => setAdminInfo(prev => ({ ...prev, gender: e.target.value }))}>
+                                            <option value="">Select gender</option>
+                                            <option value="male">Male</option>
+                                            <option value="female">Female</option>
+                                            <option value="other">Other</option>
+                                        </select>
+                                        <input type="date" className="input input-bordered" value={adminInfo?.dob || ''} onChange={(e) => setAdminInfo(prev => ({ ...prev, dob: e.target.value }))} />
+                                    </div>
+                                    <div className="flex items-center gap-2 mt-2">
+                                        <button className="btn btn-sm btn-success" onClick={async () => {
+                                            setLoading(true);
+                                            setError('');
+                                            try {
+                                                const token = localStorage.getItem('token');
+                                                const updated = await updateAdminProfile(token, adminInfo);
+                                                setAdminInfo(updated);
+                                                localStorage.setItem('user', JSON.stringify({ ...updated, role: 'admin' }));
+                                                setEditing(false);
+                                            } catch (err) {
+                                                setError(err.message || 'Failed to update profile');
+                                            } finally {
+                                                setLoading(false);
+                                            }
+                                        }}>Save</button>
+                                        <button className="btn btn-sm btn-ghost" onClick={() => {
+                                            // revert changes from localStorage
+                                            const original = JSON.parse(localStorage.getItem('user') || 'null');
+                                            setAdminInfo(original);
+                                            setEditing(false);
+                                        }}>Cancel</button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Stats Section */}
             {stats && (
