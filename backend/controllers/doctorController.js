@@ -248,3 +248,37 @@ exports.getApprovedPatients = async (req, res) => {
     res.status(500).json({ message: 'Server error while fetching approved patients' });
   }
 };
+
+// Get booked/pending time slots for a doctor on a specific date
+exports.getBookedSlots = async (req, res) => {
+  try {
+    const { doctorEmail, date } = req.query; // date in YYYY-MM-DD
+    if (!doctorEmail || !date) {
+      return res.status(400).json({ message: 'doctorEmail and date query parameters are required.' });
+    }
+
+    const start = new Date(date + 'T00:00:00.000Z');
+    const end = new Date(date + 'T23:59:59.999Z');
+
+    // Find appointments for that doctor on the given date with status booked or pending
+    const appts = await Appointment.find({
+      doctorEmail,
+      appointmentDate: { $gte: start, $lte: end },
+      status: { $in: ['booked', 'pending'] }
+    }).select('appointmentDate -_id');
+
+    const slots = appts.map(a => {
+      const d = new Date(a.appointmentDate);
+      // get hours and minutes in HH:MM 24h format
+      const hh = String(d.getHours()).padStart(2, '0');
+      const mm = String(d.getMinutes()).padStart(2, '0');
+      return `${hh}:${mm}`;
+    });
+
+    const unique = [...new Set(slots)];
+    res.status(200).json({ slots: unique });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error while fetching booked slots' });
+  }
+};

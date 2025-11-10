@@ -182,7 +182,7 @@ const Doctordashboard = () => {
 									<th>Patient</th>
 									<th>Date</th>
 									<th>Time</th>
-									<th>Reason</th>
+									{/* <th>Reason</th> */}
 									<th>Action</th>
 								</tr>
 							</thead>
@@ -192,7 +192,7 @@ const Doctordashboard = () => {
 										<td>{appt.patientEmail}</td>
 										<td>{new Date(appt.appointmentDate).toLocaleDateString()}</td>
 										<td>{new Date(appt.appointmentDate).toLocaleTimeString()}</td>
-										<td>{appt.reason || '-'}</td>
+										{/* <td>{appt.reason || '-'}</td> */}
 										<td className="flex gap-2">
 											<button
 												className="btn btn-success btn-xs"

@@ -18,6 +18,9 @@ router.put('/api/doctors/update', authMiddleware, doctorController.updateDoctor)
 router.get('/api/appointments/doctor', authMiddleware, doctorController.getAppointmentsForDoctor);
 router.get('/api/appointments/booked', authMiddleware, doctorController.getBookedAppointments);
 
+// Get booked slots for a doctor on a date (public)
+router.get('/api/appointments/slots', doctorController.getBookedSlots);
+
 // Update appointment status (accept/reject)
 router.patch('/api/appointments/:appointmentId/status', authMiddleware, doctorController.updateAppointmentStatus);
 

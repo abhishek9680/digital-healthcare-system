@@ -271,3 +271,15 @@ export const getApprovedPatientsForDoctor = async (token) => {
     throw err.response?.data || { message: 'Failed to fetch approved patients' };
   }
 };
+
+// Get booked slots for a doctor on a specific date
+export const getBookedSlotsForDoctor = async (doctorEmail, date) => {
+  try {
+    const res = await axios.get(`${BASE_URL}/appointments/slots`, {
+      params: { doctorEmail, date },
+    });
+    return res.data.slots;
+  } catch (err) {
+    throw err.response?.data || { message: 'Failed to fetch booked slots' };
+  }
+};

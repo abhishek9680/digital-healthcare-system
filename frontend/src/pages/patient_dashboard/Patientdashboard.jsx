@@ -8,6 +8,8 @@ import { getPatientProfile, getPatientAppointments, updatePatientProfile, getAll
 function Patientdashboard() {
 	const [selectedDoctor, setSelectedDoctor] = useState('');
 	const [appointmentDate, setAppointmentDate] = useState('');
+	const [appointmentTime, setAppointmentTime] = useState('');
+	const [bookedSlots, setBookedSlots] = useState([]);
 	const [appointments, setAppointments] = useState([]);
 	const [profile, setProfile] = useState(null);
 	const [editing, setEditing] = useState(false);
@@ -38,6 +40,8 @@ function Patientdashboard() {
 				setAppointments(apptRes);
 				const doctors = await getAllDoctors();
 				setDoctorsList(doctors);
+				// no booked slots initially
+				setBookedSlots([]);
 			} catch (err) {
 				setError('Failed to fetch data.');
 			}
@@ -45,6 +49,24 @@ function Patientdashboard() {
 		};
 		fetchData();
 	}, []);
+
+	// Fetch booked slots whenever doctor or date changes
+	useEffect(() => {
+		const fetchSlots = async () => {
+			setBookedSlots([]);
+			if (!selectedDoctor || !appointmentDate) return;
+			try {
+				const doctor = doctorsList.find(d => d._id === selectedDoctor);
+				if (!doctor) return;
+				const date = appointmentDate; // YYYY-MM-DD
+				const slots = await getBookedSlotsForDoctor(doctor.email, date);
+				setBookedSlots(slots || []);
+			} catch (err) {
+				console.warn('Failed to fetch booked slots', err);
+			}
+		};
+		fetchSlots();
+	}, [selectedDoctor, appointmentDate, doctorsList]);
 
 		const handleProfileChange = (e) => {
 			setEditProfile({ ...editProfile, [e.target.name]: e.target.value });
@@ -78,17 +100,20 @@ function Patientdashboard() {
 
 	const handleBook = async (e) => {
 		e.preventDefault();
-		if (!selectedDoctor || !appointmentDate) return;
+		if (!selectedDoctor || !appointmentDate || !appointmentTime) return;
 		setLoading(true);
 		setError('');
 		try {
 			const token = localStorage.getItem('token');
 			const doctor = doctorsList.find((d) => d._id === selectedDoctor);
 			const patientEmail = profile.email;
-			const newAppointment = await bookAppointment(token, doctor.email, appointmentDate, patientEmail);
+			// combine date and time into an ISO datetime string
+			const dateTimeISO = new Date(`${appointmentDate}T${appointmentTime}`).toISOString();
+			const newAppointment = await bookAppointment(token, doctor.email, dateTimeISO, patientEmail);
 			setAppointments([newAppointment, ...appointments]);
 			setSelectedDoctor('');
 			setAppointmentDate('');
+			setAppointmentTime('');
 		} catch (err) {
 			setError('Failed to book appointment.');
 		}
@@ -199,13 +224,28 @@ function Patientdashboard() {
 										</option>
 									))}
 								</select>
-								<input
-									type="date"
-									className="input input-bordered"
-									value={appointmentDate}
-									onChange={(e) => setAppointmentDate(e.target.value)}
-									required
-								/>
+								<div className="flex gap-2">
+									<input
+										type="date"
+										className="input input-bordered flex-1"
+										value={appointmentDate}
+										onChange={(e) => setAppointmentDate(e.target.value)}
+										required
+									/>
+									<select
+										className="select select-bordered w-36"
+										value={appointmentTime}
+										onChange={(e) => setAppointmentTime(e.target.value)}
+										required
+									>
+										<option value="">Select time</option>
+										{['09:00','10:00','11:00','12:00','16:00','17:00','18:00','19:00','20:00'].map(slot => (
+											<option key={slot} value={slot} disabled={bookedSlots.includes(slot)}>
+												{slot}{bookedSlots.includes(slot) ? ' (booked)' : ''}
+											</option>
+										))}
+									</select>
+								</div>
 								<button type="submit" className="btn btn-primary">Book Appointment</button>
 							</form>
 						</div>
