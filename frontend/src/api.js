@@ -256,3 +256,18 @@ export const logout = () => {
   localStorage.removeItem('token');
   localStorage.removeItem('user');
 };
+
+// Get approved patients for doctor
+export const getApprovedPatientsForDoctor = async (token) => {
+  try {
+    const user = JSON.parse(localStorage.getItem('user'));
+    const doctorEmail = user?.email;
+    const res = await axios.get(`${BASE_URL}/doctors/patients`, {
+      headers: { Authorization: `Bearer ${token}` },
+      params: { doctorEmail },
+    });
+    return res.data.patients;
+  } catch (err) {
+    throw err.response?.data || { message: 'Failed to fetch approved patients' };
+  }
+};

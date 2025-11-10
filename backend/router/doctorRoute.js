@@ -24,4 +24,7 @@ router.patch('/api/appointments/:appointmentId/status', authMiddleware, doctorCo
 // Doctor dashboard routes
 router.get('/api/doctors/profile', authMiddleware, doctorController.getProfile);
 
+// Get approved patients for current doctor
+router.get('/api/doctors/patients', authMiddleware, doctorController.getApprovedPatients);
+
 module.exports = router;

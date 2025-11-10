@@ -1,9 +1,11 @@
 import { useState , useEffect} from "react";
-import { getDoctorProfile, updateDoctorProfile, getDoctorAppointments, updateAppointmentStatus } from '../../api';
+import { getDoctorProfile, updateDoctorProfile, getDoctorAppointments, updateAppointmentStatus, getApprovedPatientsForDoctor } from '../../api';
 
 
 const Doctordashboard = () => {
 	const [appointments, setAppointments] = useState([]);
+	const [approvedPatients, setApprovedPatients] = useState([]);
+	const [searchQuery, setSearchQuery] = useState('');
 	const [profile, setProfile] = useState(null);
 	const [editing, setEditing] = useState(false);
 	const [editProfile, setEditProfile] = useState(null);
@@ -67,6 +69,15 @@ const Doctordashboard = () => {
 				// Fetch appointments
 				const appointmentsRes = await getDoctorAppointments(token);
 				setAppointments(appointmentsRes);
+
+				// Fetch approved patients (patients with booked appointments)
+				try {
+					const patientsRes = await getApprovedPatientsForDoctor(token);
+					setApprovedPatients(patientsRes || []);
+				} catch (err) {
+					// Non-fatal: show in UI if needed
+					console.warn('Failed to fetch approved patients', err);
+				}
 			} catch (err) {
 				// handle error
 			}
@@ -217,7 +228,7 @@ const Doctordashboard = () => {
 									<th>Patient</th>
 									<th>Date</th>
 									<th>Time</th>
-									<th>Reason</th>
+									{/* <th>Reason</th> */}
 								</tr>
 							</thead>
 							<tbody>
@@ -226,9 +237,56 @@ const Doctordashboard = () => {
 										<td>{appt.patientEmail}</td>
 										<td>{new Date(appt.appointmentDate).toLocaleDateString()}</td>
 										<td>{new Date(appt.appointmentDate).toLocaleTimeString()}</td>
-										<td>{appt.reason || '-'}</td>
+										{/* <td>{appt.reason || '-'}</td> */}
 									</tr>
 								))}
+							</tbody>
+						</table>
+					</div>
+				)}
+			</div>
+
+			{/* Approved Patients Section */}
+			<div className="mt-10">
+				<h2 className="text-2xl font-semibold mb-4">Approved Patients</h2>
+				<div className="mb-4">
+					<input
+						type="text"
+						placeholder="Search approved patients by name"
+						className="input input-bordered w-full max-w-sm"
+						value={searchQuery}
+						onChange={(e) => setSearchQuery(e.target.value)}
+					/>
+				</div>
+				{approvedPatients.length === 0 ? (
+					<div className="alert alert-info">No approved patients yet.</div>
+				) : (
+					<div className="overflow-x-auto">
+						<table className="table w-full">
+							<thead>
+								<tr>
+									<th>Name</th>
+									<th>Email</th>
+									<th>DOB</th>
+									<th>Gender</th>
+									<th>Medical History</th>
+								</tr>
+							</thead>
+							<tbody>
+								{approvedPatients
+									.filter(p => {
+										if (!searchQuery) return true;
+										return (p.name || '').toLowerCase().includes(searchQuery.toLowerCase());
+									})
+									.map((p) => (
+										<tr key={p._id}>
+											<td>{p.name}</td>
+											<td>{p.email}</td>
+											<td>{p.dob ? new Date(p.dob).toLocaleDateString() : '-'}</td>
+											<td>{p.gender || '-'}</td>
+											<td>{p.medicalHistory || '-'}</td>
+										</tr>
+									))}
 							</tbody>
 						</table>
 					</div>

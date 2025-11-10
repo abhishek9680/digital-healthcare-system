@@ -2,6 +2,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const Doctor = require('../models/Doctor'); 
 const Appointment = require('../models/Appointment');
+const Patient = require('../models/Patient');
 
 
 // Register new doctor
@@ -225,3 +226,25 @@ exports.getProfile = async (req, res) => {
     res.status(500).json({ message: 'Server error while fetching doctor profile' });
   }
 }
+
+// Get approved patients for a doctor (patients who have at least one 'booked' appointment with this doctor)
+exports.getApprovedPatients = async (req, res) => {
+  try {
+    const doctorEmail = req.query.doctorEmail;
+    if (!doctorEmail) {
+      return res.status(400).json({ message: 'doctorEmail query parameter is required.' });
+    }
+
+    // Find booked appointments for this doctor and extract unique patient emails
+    const appointments = await Appointment.find({ doctorEmail, status: 'booked' }).select('patientEmail -_id');
+    const patientEmails = [...new Set(appointments.map(a => a.patientEmail))];
+
+    // Fetch patient records
+    const patients = await Patient.find({ email: { $in: patientEmails } }).select('-password');
+
+    res.status(200).json({ message: 'Approved patients fetched', total: patients.length, patients });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error while fetching approved patients' });
+  }
+};
