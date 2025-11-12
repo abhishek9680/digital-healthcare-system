@@ -283,3 +283,48 @@ export const getBookedSlotsForDoctor = async (doctorEmail, date) => {
     throw err.response?.data || { message: 'Failed to fetch booked slots' };
   }
 };
+
+// Prescriptions
+export const createPrescription = async (token, payload) => {
+  try {
+    const res = await axios.post(`${BASE_URL}/prescriptions`, payload, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return res.data.prescription;
+  } catch (err) {
+    throw err.response?.data || { message: 'Failed to create prescription' };
+  }
+};
+
+export const getPrescriptionsByPatient = async (token, patientId) => {
+  try {
+    const res = await axios.get(`${BASE_URL}/prescriptions/patient/${patientId}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return res.data.prescriptions;
+  } catch (err) {
+    throw err.response?.data || { message: 'Failed to fetch prescriptions' };
+  }
+};
+
+export const getPrescriptionByAppointment = async (token, appointmentId) => {
+  try {
+    const res = await axios.get(`${BASE_URL}/prescriptions/appointment/${appointmentId}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return res.data.prescription;
+  } catch (err) {
+    throw err.response?.data || { message: 'Failed to fetch prescription' };
+  }
+};
+
+export const getPrescriptionsByDoctor = async (token) => {
+  try {
+    const res = await axios.get(`${BASE_URL}/prescriptions/doctor`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return res.data.prescriptions;
+  } catch (err) {
+    throw err.response?.data || { message: 'Failed to fetch prescriptions for doctor' };
+  }
+};

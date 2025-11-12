@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { getPatientProfile, getPatientAppointments, updatePatientProfile, getAllDoctors, bookAppointment } from '../../api';
+import { getPatientProfile, getPatientAppointments, updatePatientProfile, getAllDoctors, bookAppointment, getPrescriptionsByPatient, getPrescriptionByAppointment } from '../../api';
 
 function Patientdashboard() {
   const [selectedDoctor, setSelectedDoctor] = useState('');
@@ -14,6 +14,9 @@ function Patientdashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [doctorsList, setDoctorsList] = useState([]);
+  const [prescriptions, setPrescriptions] = useState([]);
+  const [showPrescriptionModal, setShowPrescriptionModal] = useState(false);
+  const [activePrescription, setActivePrescription] = useState(null);
 
   // Helpers for avatar
   const getInitials = (name) => {
@@ -54,6 +57,13 @@ function Patientdashboard() {
         setAppointments(apptRes);
         const doctors = await getAllDoctors();
         setDoctorsList(doctors);
+        // Fetch prescriptions for this patient
+        try {
+          const pres = await getPrescriptionsByPatient(token, profileRes._id);
+          setPrescriptions(pres || []);
+        } catch (err) {
+          console.warn('Failed to fetch prescriptions', err);
+        }
         // no booked slots initially
         setBookedSlots([]);
       } catch (err) {
@@ -323,6 +333,54 @@ function Patientdashboard() {
           </div>
         )}
       </div>
+
+      {/* Prescriptions */}
+      <div className="mt-6 bg-white p-6 rounded-lg shadow">
+        <h3 className="text-xl font-semibold mb-4">Prescriptions</h3>
+        {prescriptions.length === 0 ? (
+          <p className="text-gray-500">No prescriptions yet.</p>
+        ) : (
+          <div className="grid gap-3">
+            {prescriptions.map(p => (
+              <div key={p._id} className="p-4 border rounded flex items-center justify-between">
+                <div>
+                  <div className="font-semibold">{p.doctorEmail}</div>
+                  <div className="text-sm text-gray-500">{new Date(p.createdAt).toLocaleString()}</div>
+                </div>
+                <div>
+                  <button className="btn btn-sm btn-outline" onClick={async ()=>{ setActivePrescription(p); setShowPrescriptionModal(true); }}>View</button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Prescription detail modal */}
+      {showPrescriptionModal && activePrescription && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl p-6">
+            <h3 className="text-lg font-semibold mb-2">Prescription from {activePrescription.doctorEmail}</h3>
+            <div className="text-sm text-gray-500 mb-4">Date: {new Date(activePrescription.createdAt).toLocaleString()}</div>
+            <div className="space-y-3 max-h-72 overflow-y-auto">
+              {activePrescription.medicines.map((m, i) => (
+                <div key={i} className="p-3 border rounded">
+                  <div className="font-semibold">{m.name}</div>
+                  <div className="text-sm">Dosage: {m.dosage || '—'}</div>
+                  <div className="text-sm">Instructions: {m.instructions || '—'}</div>
+                </div>
+              ))}
+            </div>
+            <div className="mt-4">
+              <div className="font-medium">Notes</div>
+              <div className="text-sm text-gray-700">{activePrescription.additionalNotes || '—'}</div>
+            </div>
+            <div className="mt-4 text-right">
+              <button className="btn btn-ghost" onClick={() => { setShowPrescriptionModal(false); setActivePrescription(null); }}>Close</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
