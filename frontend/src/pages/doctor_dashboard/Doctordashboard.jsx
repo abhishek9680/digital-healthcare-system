@@ -102,167 +102,188 @@ const Doctordashboard = () => {
 	const scheduled = appointments.filter((a) => a.status === "booked");
 
 	return (
-		<div className="min-h-screen bg-base-100 p-6">
-			<h1 className="text-3xl font-bold mb-8 text-primary">Doctor Dashboard</h1>
-			{/* Profile Section */}
-			<div className="mb-10 bg-white p-6 rounded-lg shadow max-w-xl mx-auto">
-				<h2 className="text-2xl font-semibold mb-4">Profile</h2>
-				{editing ? (
-					<form className="grid grid-cols-1 gap-3 mb-2" onSubmit={e => { e.preventDefault(); handleSave(); }}>
-						<label>
-							<span className="font-medium">Name:</span>
-							<input
-								type="text"
-								name="name"
-								className="input input-bordered w-full mt-1"
-								value={editProfile?.name || ''}
-								onChange={handleProfileChange}
-								required
-							/>
-						</label>
-						<label>
-							<span className="font-medium">speciality:</span>
-							<input
-								type="text"
-								name="speciality"
-								className="input input-bordered w-full mt-1"
-								value={editProfile?.speciality || ''}
-								onChange={handleProfileChange}
-								required
-							/>
-						</label>
-						<label>
-							<span className="font-medium">Works At:</span>
-							<input
-								type="text"
-								name="worksAt"
-								className="input input-bordered w-full mt-1"
-								value={editProfile?.worksAt || ''}
-								onChange={handleProfileChange}
-								required
-							/>
-						</label>
-						<label>
-							<span className="font-medium">Experience:</span>
-							<input
-								type="text"
-								name="experience"
-								className="input input-bordered w-full mt-1"
-								value={editProfile?.experience || ''}
-								onChange={handleProfileChange}
-								required
-							/>
-						</label>
-						<div className="flex gap-2 mt-2">
-							<button type="submit" className="btn btn-primary">Save</button>
-							<button type="button" className="btn btn-outline" onClick={handleCancel}>Cancel</button>
+		<div className="min-h-screen bg-base-200 py-8">
+			<div className="max-w-6xl mx-auto px-4">
+				<header className="mb-6">
+					<div className="rounded-lg overflow-hidden shadow-lg">
+						<div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 p-6 flex items-center justify-between text-white">
+							<div className="flex items-center gap-4">
+								<img src="/logo.jpg" alt="logo" onError={(e)=>{e.currentTarget.src='/doctor.jpg'}} className="w-12 h-12 rounded-md shadow-inner object-cover border-2 border-white/30" />
+								<div>
+									<h1 className="text-3xl font-extrabold tracking-tight">Doctor Dashboard</h1>
+									<p className="text-sm opacity-90">Manage appointments, view approved patients and update your profile</p>
+								</div>
+							</div>
+					{/* Quick Stats */}
+					<div className="flex items-center gap-3">
+						<div className="bg-white/90 text-gray-800 px-4 py-3 rounded-lg shadow backdrop-blur-sm">
+							<div className="text-xs uppercase tracking-wide">Pending</div>
+							<div className="text-2xl font-bold text-yellow-600">{pending.length}</div>
 						</div>
-					</form>
-				) : (
-					<div className="grid grid-cols-1 gap-2">
-						<div><span className="font-medium">Name:</span> {profile?.name}</div>
-						<div><span className="font-medium">speciality:</span> {profile?.speciality}</div>
-						<div><span className="font-medium">Works At:</span> {profile?.worksAt}</div>
-						<div><span className="font-medium">Experience:</span> {profile?.experience}</div>
-						<button className="btn btn-secondary mt-2 w-fit" onClick={handleEdit}>Edit</button>
+						<div className="bg-white/90 text-gray-800 px-4 py-3 rounded-lg shadow backdrop-blur-sm">
+							<div className="text-xs uppercase tracking-wide">Scheduled</div>
+							<div className="text-2xl font-bold text-green-600">{scheduled.length}</div>
+						</div>
+						<div className="bg-white/90 text-gray-800 px-4 py-3 rounded-lg shadow backdrop-blur-sm">
+							<div className="text-xs uppercase tracking-wide">Patients</div>
+							<div className="text-2xl font-bold text-blue-600">{approvedPatients.length}</div>
+						</div>
 					</div>
-				)}
-			</div>
-
-			{/* Pending Appointments */}
-			<div className="mb-10">
-				<h2 className="text-2xl font-semibold mb-4">Appointment Requests</h2>
-				{pending.length === 0 ? (
-					<div className="alert alert-info">No pending appointment requests.</div>
-				) : (
-					<div className="overflow-x-auto">
-						<table className="table w-full">
-							<thead>
-								<tr>
-									<th>Patient</th>
-									<th>Date</th>
-									<th>Time</th>
-									{/* <th>Reason</th> */}
-									<th>Action</th>
-								</tr>
-							</thead>
-							<tbody>
-								{pending.map((appt) => (
-									<tr key={appt._id}>
-										<td>{appt.patientEmail}</td>
-										<td>{new Date(appt.appointmentDate).toLocaleDateString()}</td>
-										<td>{new Date(appt.appointmentDate).toLocaleTimeString()}</td>
-										{/* <td>{appt.reason || '-'}</td> */}
-										<td className="flex gap-2">
-											<button
-												className="btn btn-success btn-xs"
-												onClick={() => handleAction(appt._id, "accepted")}
-											>
-												Accept
-											</button>
-											<button
-												className="btn btn-error btn-xs"
-												onClick={() => handleAction(appt._id, "rejected")}
-											>
-												Reject
-											</button>
-										</td>
-									</tr>
-								))}
-							</tbody>
-						</table>
 					</div>
-				)}
-			</div>
-
-			{/* Scheduled Appointments */}
-			<div>
-				<h2 className="text-2xl font-semibold mb-4">Scheduled Appointments</h2>
-				{scheduled.length === 0 ? (
-					<div className="alert alert-info">No scheduled appointments.</div>
-				) : (
-					<div className="overflow-x-auto">
-						<table className="table w-full">
-							<thead>
-								<tr>
-									<th>Patient</th>
-									<th>Date</th>
-									<th>Time</th>
-									{/* <th>Reason</th> */}
-								</tr>
-							</thead>
-							<tbody>
-								{scheduled.map((appt) => (
-									<tr key={appt._id}>
-										<td>{appt.patientEmail}</td>
-										<td>{new Date(appt.appointmentDate).toLocaleDateString()}</td>
-										<td>{new Date(appt.appointmentDate).toLocaleTimeString()}</td>
-										{/* <td>{appt.reason || '-'}</td> */}
-									</tr>
-								))}
-							</tbody>
-						</table>
-					</div>
-				)}
-			</div>
-
-			{/* Approved Patients Section */}
-			<div className="mt-10">
-				<h2 className="text-2xl font-semibold mb-4">Approved Patients</h2>
-				<div className="mb-4">
-					<input
-						type="text"
-						placeholder="Search approved patients by name"
-						className="input input-bordered w-full max-w-sm"
-						value={searchQuery}
-						onChange={(e) => setSearchQuery(e.target.value)}
-					/>
 				</div>
-				{approvedPatients.length === 0 ? (
-					<div className="alert alert-info">No approved patients yet.</div>
-				) : (
-					<div className="overflow-x-auto">
-						<table className="table w-full">
+			</header>
+
+				{/* Main grid: Profile + lists */}
+				<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+					{/* Profile card */}
+					<div className="col-span-1 bg-white rounded-lg shadow p-6">
+						<div className="flex items-center gap-4">
+							{/* Name-based avatar: generated gradient with initials when no profile photo */}
+							{profile?.avatarUrl ? (
+								<img src={profile.avatarUrl} alt="doctor avatar" onError={(e)=>{e.currentTarget.src='/logo.jpg'}} className="w-20 h-20 rounded-full object-cover ring-4 ring-white shadow-md" />
+							) : (
+								<div
+									aria-label={profile?.name || 'Doctor avatar'}
+									title={profile?.name || 'Doctor'}
+									className="w-20 h-20 rounded-full flex items-center justify-center text-white font-bold shadow-md"
+									style={{
+										background: (() => {
+											const name = profile?.name || 'Doctor';
+											let hash = 0;
+											for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+											const colors = [
+												['#6EE7B7','#3B82F6'],
+												['#FDE68A','#F97316'],
+												['#A78BFA','#F472B6'],
+												['#60A5FA','#34D399'],
+												['#FCA5A5','#F59E0B'],
+											];
+											const pair = colors[Math.abs(hash) % colors.length];
+											return `linear-gradient(135deg, ${pair[0]}, ${pair[1]})`;
+										})(),
+									}}
+								>
+									{(profile?.name || 'DR').split(' ').map(n=>n[0]).slice(0,2).join('').toUpperCase()}
+								</div>
+							)}
+							<div>
+								<h3 className="text-xl font-semibold">{profile?.name}</h3>
+								<p className="text-sm text-gray-500">{profile?.email}</p>
+								<p className="mt-2 text-sm"><span className="font-medium">Speciality:</span> {profile?.speciality || '-'}</p>
+								<p className="text-sm"><span className="font-medium">Works At:</span> {profile?.worksAt || '-'}</p>
+								<p className="text-sm"><span className="font-medium">Experience:</span> {profile?.experience || '-'}</p>
+								<div className="mt-3">
+									<button className="btn btn-sm btn-outline mr-2" onClick={handleEdit}>Edit</button>
+								</div>
+							</div>
+						</div>
+						{/* Edit form rendered inline */}
+						{editing && (
+							<div className="mt-4">
+								<form onSubmit={e=>{e.preventDefault(); handleSave();}} className="space-y-3">
+									<input name="name" value={editProfile?.name||''} onChange={handleProfileChange} className="input input-bordered w-full" placeholder="Full name" />
+									<input name="speciality" value={editProfile?.speciality||''} onChange={handleProfileChange} className="input input-bordered w-full" placeholder="Speciality" />
+									<input name="worksAt" value={editProfile?.worksAt||''} onChange={handleProfileChange} className="input input-bordered w-full" placeholder="Works At" />
+									<input name="experience" value={editProfile?.experience||''} onChange={handleProfileChange} className="input input-bordered w-full" placeholder="Experience" />
+									<div className="flex gap-2">
+										<button className="btn btn-primary btn-sm" type="submit">Save</button>
+										<button className="btn btn-ghost btn-sm" type="button" onClick={handleCancel}>Cancel</button>
+									</div>
+								</form>
+							</div>
+						)}
+					</div>
+
+					{/* Appointments list (spans 2 columns on large screens) */}
+					<div className="col-span-1 lg:col-span-2 space-y-6">
+						{/* Pending Requests */}
+						<div className="bg-white rounded-lg shadow p-4">
+							<div className="flex items-center justify-between mb-3">
+								<h3 className="font-semibold">Appointment Requests</h3>
+								<span className="text-sm text-gray-500">{pending.length} pending</span>
+							</div>
+							{pending.length === 0 ? (
+								<div className="alert alert-info">No pending appointment requests.</div>
+							) : (
+								<table className="table table-zebra w-full">
+									<thead>
+										<tr>
+											<th>Patient</th>
+											<th>Date</th>
+											<th>Time</th>
+											<th>Action</th>
+										</tr>
+									</thead>
+									<tbody>
+										{pending.map((appt) => (
+											<tr key={appt._id}>
+												<td>{appt.patientEmail}</td>
+												<td>{new Date(appt.appointmentDate).toLocaleDateString()}</td>
+												<td>{new Date(appt.appointmentDate).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</td>
+												<td className="flex gap-2">
+													<button className="btn btn-success btn-xs flex items-center gap-1" onClick={() => handleAction(appt._id, 'accepted')}>
+														<svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+															<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+														</svg>
+														<span>Accept</span>
+													</button>
+													<button className="btn btn-error btn-xs flex items-center gap-1" onClick={() => handleAction(appt._id, 'rejected')}>
+														<svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+															<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
+														</svg>
+														<span>Reject</span>
+													</button>
+												</td>
+											</tr>
+										))}
+									</tbody>
+								</table>
+							)}
+						</div>
+
+						{/* Scheduled Appointments */}
+						<div className="bg-white rounded-lg shadow p-4">
+							<div className="flex items-center justify-between mb-3">
+								<h3 className="font-semibold">Scheduled Appointments</h3>
+								<span className="text-sm text-gray-500">{scheduled.length} scheduled</span>
+							</div>
+							{scheduled.length === 0 ? (
+								<div className="alert alert-info">No scheduled appointments.</div>
+							) : (
+								<table className="table table-zebra w-full">
+									<thead>
+										<tr>
+											<th>Patient</th>
+											<th>Date</th>
+											<th>Time</th>
+										</tr>
+									</thead>
+									<tbody>
+										{scheduled.map((appt) => (
+											<tr key={appt._id}>
+												<td>{appt.patientEmail}</td>
+												<td>{new Date(appt.appointmentDate).toLocaleDateString()}</td>
+												<td>{new Date(appt.appointmentDate).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</td>
+											</tr>
+										))}
+									</tbody>
+								</table>
+							)}
+						</div>
+					</div>
+				</div>
+				{/* Approved Patients card below grid */}
+				<div className="mt-6 bg-white rounded-lg shadow p-4 col-span-3">
+					<div className="flex items-center justify-between mb-3">
+						<h3 className="font-semibold">Approved Patients</h3>
+						<div className="w-full max-w-sm">
+							<input type="text" placeholder="Search approved patients" className="input input-bordered w-full" value={searchQuery} onChange={(e)=>setSearchQuery(e.target.value)} />
+						</div>
+					</div>
+					{approvedPatients.length === 0 ? (
+						<div className="alert alert-info">No approved patients yet.</div>
+					) : (
+						<table className="table table-zebra w-full">
 							<thead>
 								<tr>
 									<th>Name</th>
@@ -273,26 +294,21 @@ const Doctordashboard = () => {
 								</tr>
 							</thead>
 							<tbody>
-								{approvedPatients
-									.filter(p => {
-										if (!searchQuery) return true;
-										return (p.name || '').toLowerCase().includes(searchQuery.toLowerCase());
-									})
-									.map((p) => (
-										<tr key={p._id}>
-											<td>{p.name}</td>
-											<td>{p.email}</td>
-											<td>{p.dob ? new Date(p.dob).toLocaleDateString() : '-'}</td>
-											<td>{p.gender || '-'}</td>
-											<td>{p.medicalHistory || '-'}</td>
-										</tr>
-									))}
+								{approvedPatients.filter(p => !searchQuery || (p.name||'').toLowerCase().includes(searchQuery.toLowerCase())).map(p => (
+									<tr key={p._id}>
+										<td>{p.name}</td>
+										<td>{p.email}</td>
+										<td>{p.dob ? new Date(p.dob).toLocaleDateString() : '-'}</td>
+										<td>{p.gender || '-'}</td>
+										<td>{p.medicalHistory || '-'}</td>
+									</tr>
+								))}
 							</tbody>
 						</table>
-					</div>
-				)}
+					)}
+				</div>
 			</div>
-		</div>
+			</div>
 	);
 };
 
