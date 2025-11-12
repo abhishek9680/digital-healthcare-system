@@ -32,10 +32,11 @@ const RegisterPage = () => {
 			} else if (role === 'patient') {
 				const payload = { ...form, gender: 'Not specified' };
 				res = await registerPatient(payload);
-			} else if (role === 'admin') {
-				// Register admin (ensure backend endpoint exists)
-				res = await registerAdmin(form);
 			}
+			//  else if (role === 'admin') {
+			// 	// Register admin (ensure backend endpoint exists)
+			// 	res = await registerAdmin(form);
+			// }
 			// Use backend-provided message if available (doctor may get pending-approval notice)
 			setSuccess(res?.message || 'Registration successful! Please login.');
 			// If registration was for doctor, keep on the page to show pending message but still navigate to login after a short delay
@@ -55,7 +56,7 @@ const RegisterPage = () => {
 				<div className="tabs tabs-boxed mb-4">
 					<button className={`tab ${role === 'doctor' ? 'tab-active' : ''}`} onClick={() => handleRoleChange('doctor')}>Doctor</button>
 					<button className={`tab ${role === 'patient' ? 'tab-active' : ''}`} onClick={() => handleRoleChange('patient')}>Patient</button>
-					<button className={`tab ${role === 'admin' ? 'tab-active' : ''}`} onClick={() => handleRoleChange('admin')}>Admin</button>
+					{/* <button className={`tab ${role === 'admin' ? 'tab-active' : ''}`} onClick={() => handleRoleChange('admin')}>Admin</button> */}
 				</div>
 
 				<form className="flex flex-col gap-4" onSubmit={handleSubmit}>
