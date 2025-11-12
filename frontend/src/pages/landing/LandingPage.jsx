@@ -25,7 +25,7 @@ function LandingPage() {
       <section className="py-16 bg-base-100">
         <div className="max-w-5xl mx-auto px-4">
           <h2 className="text-3xl font-bold text-center mb-10">Key Features</h2>
-          <div className="grid gap-8 md:grid-cols-3">
+          <div className="grid gap-8 md:grid-cols-4">
             <div className="card bg-base-200 shadow-md">
               <div className="card-body items-center text-center">
                 <span className="text-4xl">📅</span>
@@ -45,6 +45,13 @@ function LandingPage() {
                 <span className="text-4xl">🔒</span>
                 <h3 className="card-title mt-2">Secure & Private</h3>
                 <p>Your health data is protected with industry-standard security and privacy measures.</p>
+              </div>
+            </div>
+            <div className="card bg-base-200 shadow-md">
+              <div className="card-body items-center text-center">
+                <span className="text-4xl">🛠️</span>
+                <h3 className="card-title mt-2">Admin: Manage Doctors</h3>
+                <p>Admins can review, approve, or remove doctor accounts — keeping the platform safe and trusted.</p>
               </div>
             </div>
           </div>
