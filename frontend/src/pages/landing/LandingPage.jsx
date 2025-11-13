@@ -14,7 +14,7 @@ function LandingPage() {
           <div>
             <h1 className="text-5xl font-bold text-primary mb-4">Digital Healthcare Management System</h1>
             <p className="py-4 text-lg text-base-content">
-              Seamlessly schedule, view, and manage your healthcare appointments. Empowering patients and doctors with a secure, easy-to-use platform.
+              Seamlessly schedule, view, and manage your healthcare appointments. Empowering patients and doctors with a secure, easy-to-use platform. Allowing admins to oversee and manage doctor accounts effectively. Doctors can send prescription to scheduled patients and also have a track of prescription of patients.
             </p>
             <a href="/register" className="btn btn-primary btn-lg mt-4">Book an Appointment</a>
           </div>
