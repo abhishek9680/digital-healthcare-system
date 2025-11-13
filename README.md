@@ -8,19 +8,21 @@ A modern MERN stack application for managing healthcare appointments, with separ
 
 ---
 
-## ✨ What’s new / Key features
+## ✨  Key features
 - Patient and Doctor registration & login
 - Secure JWT authentication
 - Book, accept, and reject appointments
 - Doctor, Patient and Admin dashboards
 - Role-based navigation and protected routes
 - Responsive UI with Tailwind CSS & daisyUI
+- doctor prescription composer and patient prescription viewer.
 
-New / updated functionality in this branch:
+Important functionality in this branch:
 - Admin-managed doctor approvals: new doctor accounts are created in a pending state and require explicit admin approval before they can log in.
 - Admin dashboard: review pending doctor registrations, approve or reject, delete doctor/patient accounts.
-- Improved Patient dashboard UI: modern layout with gradient header, profile card, booking panel and scrollable doctors list.
+- Patient dashboard UI: modern layout with gradient header, profile card, booking panel and scrollable doctors list.
 - Deterministic generated avatars (initials + gradient) for users when no photo is present.
+- Prescription management: doctors can create prescriptions tied to appointments; patients can view and download them.
 
 ---
 
@@ -120,6 +122,8 @@ If you need to make existing doctor records usable immediately, either approve t
 - Doctor registration now returns a "pending approval" message; doctor login will return 403 if account is not approved.
 - Admin dashboard now has tabs for managing doctors, patients and pending approvals.
 
+- Prescription : a doctor-facing prescription composer (create medicines, dosages, notes) and a patient-facing prescriptions list/view are available in the current UI.
+
 ---
 
 ## 🧪 Quick API checks (examples)
@@ -146,10 +150,6 @@ curl -X PUT -H "Authorization: Bearer <ADMIN_TOKEN>" http://localhost:5000/api/a
 
 ---
 
-## 🤝 Contributing
-Pull requests are welcome! For major changes, please open an issue first to discuss what you would like to change.
-
----
 
 ## 💡 Credits
 - [React](https://react.dev/)
