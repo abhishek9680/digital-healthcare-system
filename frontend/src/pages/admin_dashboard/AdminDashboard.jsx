@@ -36,6 +36,25 @@ const AdminDashboard = () => {
     const [activeTab, setActiveTab] = useState('doctors'); // 'doctors' or 'patients' or 'pending'
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [doctorSearch, setDoctorSearch] = useState('');
+    const [patientSearch, setPatientSearch] = useState('');
+
+    // Avatar helpers for name-based gradient avatar
+    const getInitials = (name) => {
+        if (!name) return 'A';
+        const parts = name.trim().split(/\s+/).filter(Boolean);
+        if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+        return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+    };
+
+    const nameToGradient = (name) => {
+        const base = (name || 'admin').split('').reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
+        const hue1 = (base * 37) % 360;
+        const hue2 = (hue1 + 45) % 360;
+        const c1 = `hsl(${hue1} 75% 50%)`;
+        const c2 = `hsl(${hue2} 70% 40%)`;
+        return `linear-gradient(135deg, ${c1}, ${c2})`;
+    };
 
     useEffect(() => {
         const fetchData = async () => {
@@ -160,15 +179,20 @@ const AdminDashboard = () => {
                                     <img src={adminInfo.avatar} alt="Admin avatar" className="object-cover w-full h-full" />
                                 </div>
                             ) : (
-                                <span className="p-10 ring-2 ring-primary rounded-full text-neutral-content text-2xl font-bold">
-                                    {(() => {
-                                        const name = adminInfo?.name || adminInfo?.email || '';
-                                        if (!name) return 'A';
-                                        const parts = name.trim().split(/\s+/);
-                                        if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
-                                        return (parts[0].charAt(0) + parts[1].charAt(0)).toUpperCase();
-                                    })()}
-                                </span>
+                                <div
+                                    className="w-16 h-16 rounded-full flex items-center justify-center text-white text-xl font-extrabold select-none uppercase"
+                                    style={{
+                                        background: nameToGradient(adminInfo?.name || adminInfo?.email || 'Admin'),
+                                        boxShadow: '0 6px 18px rgba(0,0,0,0.12)',
+                                        lineHeight: '4rem',
+                                        textAlign: 'center',
+                                        fontSize: '20px',
+                                        padding: 0,
+                                    }}
+                                    title={adminInfo?.name || adminInfo?.email || 'Admin'}
+                                >
+                                    {String(getInitials(adminInfo?.name || adminInfo?.email || '')).slice(0,2)}
+                                </div>
                             )}
                         </div>
                         <div className="flex-1">
@@ -236,19 +260,21 @@ const AdminDashboard = () => {
 
             {/* Stats Section */}
             {stats && (
-                <div className="stats shadow mb-8">
-                    <div className="stat">
-                        <div className="stat-title">Total Doctors (Approved)</div>
-                        {/* Show approved doctors = totalDoctors - pending */}
-                        <div className="stat-value">{Math.max(0, (stats.totalDoctors || 0) - (stats.pending ?? pendingDoctors.length))}</div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+                    <div className="p-4 rounded-lg shadow bg-gradient-to-r from-indigo-500 to-indigo-400 text-white">
+                        <div className="text-sm uppercase opacity-90">Total Doctors</div>
+                        <div className="text-2xl font-bold mt-1">{Math.max(0, (stats.totalDoctors || 0) - (stats.pending ?? pendingDoctors.length))}</div>
+                        <div className="text-xs opacity-80 mt-1">Approved</div>
                     </div>
-                    <div className="stat">
-                        <div className="stat-title">Total Patients</div>
-                        <div className="stat-value">{stats.totalPatients}</div>
+                    <div className="p-4 rounded-lg shadow bg-gradient-to-r from-emerald-500 to-emerald-400 text-white">
+                        <div className="text-sm uppercase opacity-90">Total Patients</div>
+                        <div className="text-2xl font-bold mt-1">{stats.totalPatients}</div>
+                        <div className="text-xs opacity-80 mt-1">Active</div>
                     </div>
-                    <div className="stat">
-                        <div className="stat-title">Pending Approvals</div>
-                        <div className="stat-value">{stats.pending ?? pendingDoctors.length}</div>
+                    <div className="p-4 rounded-lg shadow bg-gradient-to-r from-yellow-400 to-yellow-300 text-white">
+                        <div className="text-sm uppercase opacity-90">Pending Approvals</div>
+                        <div className="text-2xl font-bold mt-1">{stats.pending ?? pendingDoctors.length}</div>
+                        <div className="text-xs opacity-80 mt-1">Needs review</div>
                     </div>
                 </div>
             )}
@@ -296,8 +322,12 @@ const AdminDashboard = () => {
             {activeTab === 'doctors' && (
                 <div>
                     <h2 className="text-2xl font-semibold mb-4">Doctors List</h2>
+                    <div className="mb-3 flex items-center gap-3">
+                        <input type="text" placeholder="Search doctors by name or email" className="input input-bordered flex-1" value={doctorSearch} onChange={(e)=>setDoctorSearch(e.target.value)} />
+                        <button className="btn btn-ghost" onClick={() => setDoctorSearch('')}>Clear</button>
+                    </div>
                     <div className="overflow-x-auto">
-                        <table className="table w-full">
+                        <table className="table table-compact w-full">
                             <thead>
                                 <tr>
                                     <th>Name</th>
@@ -308,17 +338,18 @@ const AdminDashboard = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {doctors.map((doctor) => (
+                                {doctors.filter(d => !doctorSearch || (d.name||'').toLowerCase().includes(doctorSearch.toLowerCase()) || (d.email||'').toLowerCase().includes(doctorSearch.toLowerCase())).map((doctor) => (
                                     <tr key={doctor._id}>
-                                        <td>{doctor.name}</td>
-                                        <td>{doctor.email}</td>
-                                        <td>{doctor.speciality}</td>
-                                        <td>{doctor.experience}</td>
+                                        <td className="font-medium">{doctor.name}</td>
+                                        <td className="text-sm text-gray-600">{doctor.email}</td>
+                                        <td className="text-sm">{doctor.speciality}</td>
+                                        <td className="text-sm">{doctor.experience}</td>
                                         <td>
                                             <button
                                                 className="btn btn-error btn-xs"
                                                 onClick={() => handleDeleteDoctor(doctor._id)}
                                             >
+                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                                                 Delete
                                             </button>
                                         </td>
@@ -334,8 +365,12 @@ const AdminDashboard = () => {
             {activeTab === 'patients' && (
                 <div>
                     <h2 className="text-2xl font-semibold mb-4">Patients List</h2>
+                    <div className="mb-3 flex items-center gap-3">
+                        <input type="text" placeholder="Search patients by name or email" className="input input-bordered flex-1" value={patientSearch} onChange={(e)=>setPatientSearch(e.target.value)} />
+                        <button className="btn btn-ghost" onClick={() => setPatientSearch('')}>Clear</button>
+                    </div>
                     <div className="overflow-x-auto">
-                        <table className="table w-full">
+                        <table className="table table-compact w-full">
                             <thead>
                                 <tr>
                                     <th>Name</th>
@@ -344,15 +379,16 @@ const AdminDashboard = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {patients.map((patient) => (
+                                {patients.filter(p => !patientSearch || (p.name||'').toLowerCase().includes(patientSearch.toLowerCase()) || (p.email||'').toLowerCase().includes(patientSearch.toLowerCase())).map((patient) => (
                                     <tr key={patient._id}>
-                                        <td>{patient.name}</td>
-                                        <td>{patient.email}</td>
+                                        <td className="font-medium">{patient.name}</td>
+                                        <td className="text-sm text-gray-600">{patient.email}</td>
                                         <td>
                                             <button
                                                 className="btn btn-error btn-xs"
                                                 onClick={() => handleDeletePatient(patient._id)}
                                             >
+                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                                                 Delete
                                             </button>
                                         </td>
@@ -369,7 +405,7 @@ const AdminDashboard = () => {
                 <div>
                     <h2 className="text-2xl font-semibold mb-4">Pending Doctor Approvals</h2>
                     <div className="overflow-x-auto">
-                        <table className="table w-full">
+                        <table className="table table-compact w-full">
                             <thead>
                                 <tr>
                                     <th>Name</th>
@@ -382,21 +418,23 @@ const AdminDashboard = () => {
                             <tbody>
                                 {pendingDoctors.map((doctor) => (
                                     <tr key={doctor._id}>
-                                        <td>{doctor.name}</td>
-                                        <td>{doctor.email}</td>
-                                        <td>{doctor.speciality}</td>
-                                        <td>{doctor.experience}</td>
+                                        <td className="font-medium">{doctor.name}</td>
+                                        <td className="text-sm text-gray-600">{doctor.email}</td>
+                                        <td className="text-sm">{doctor.speciality}</td>
+                                        <td className="text-sm">{doctor.experience}</td>
                                         <td className="flex gap-2">
                                             <button
-                                                className="btn btn-success btn-xs"
+                                                className="btn btn-success btn-xs flex items-center gap-1"
                                                 onClick={() => handleApproveDoctor(doctor._id)}
                                             >
+                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
                                                 Approve
                                             </button>
                                             <button
-                                                className="btn btn-error btn-xs"
+                                                className="btn btn-error btn-xs flex items-center gap-1"
                                                 onClick={() => handleRejectDoctor(doctor._id)}
                                             >
+                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" /></svg>
                                                 Reject
                                             </button>
                                         </td>

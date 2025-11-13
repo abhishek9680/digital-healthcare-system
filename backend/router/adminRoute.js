@@ -8,7 +8,7 @@ const adminAuth = require('../middleware/adminAuthMiddleware');
 router.post('/api/admin/login', adminController.login);
 
 // Admin register
-router.post('/api/admin/register', adminController.register);
+router.post('/api/admin/register', adminController.register);    // only created by coder
 
 // Admin profile endpoints
 router.get('/api/admin/profile', adminAuth, adminController.getProfile);
